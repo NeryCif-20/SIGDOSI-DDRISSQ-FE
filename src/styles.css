@@ -91,3 +91,9 @@
     @apply bg-background text-foreground;
   }
 }
+
+@utility fill-current {
+  & svg {
+    fill: currentColor;
+  }
+}

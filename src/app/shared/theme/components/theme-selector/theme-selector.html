@@ -1,0 +1,34 @@
+<button
+  hlmBtn
+  size="icon"
+  variant="ghost"
+  class="rounded-full"
+  hlmTooltip="Cambiar tema"
+  [showDelay]="1000"
+  position="left"
+  [hlmDropdownMenuTrigger]="themeSelector"
+  align="center"
+>
+  <ng-icon class="fill-current" [name]="currentOption().icon" />
+  <span class="sr-only">Cambiar tema, actual: {{ currentOption().label }}</span>
+</button>
+
+<ng-template #themeSelector>
+  <hlm-dropdown-menu>
+    <hlm-dropdown-menu-group>
+      <hlm-dropdown-menu-label>Tema</hlm-dropdown-menu-label>
+      @for (option of options; track option.value) {
+        <button
+          hlmDropdownMenuRadio
+          class="group"
+          [checked]="themeService.preference() === option.value"
+          (triggered)="themeService.setPreference(option.value)"
+        >
+          <ng-icon class="group-[:is(:focus,[data-checked])]:fill-current" [name]="option.icon" />
+          {{ option.label }}
+          <hlm-dropdown-menu-radio-indicator />
+        </button>
+      }
+    </hlm-dropdown-menu-group>
+  </hlm-dropdown-menu>
+</ng-template>

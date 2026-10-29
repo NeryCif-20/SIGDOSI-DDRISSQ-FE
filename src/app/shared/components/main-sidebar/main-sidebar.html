@@ -1,0 +1,11 @@
+<div hlmSidebarWrapper class="flex flex-col">
+  <ng-content select="[header]" />
+  <div class="flex flex-1">
+    <hlm-sidebar
+      variant="inset"
+      sidebarContainerClass="top-(--header-height) h-[calc(100svh-var(--header-height))]"
+    >
+    </hlm-sidebar>
+    <ng-content />
+  </div>
+</div>

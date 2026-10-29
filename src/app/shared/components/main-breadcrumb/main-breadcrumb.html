@@ -1,0 +1,23 @@
+<nav hlmBreadcrumb>
+  <ol hlmBreadcrumbList>
+    @if (items().length > 0) {
+      <li hlmBreadcrumbItem>
+        <a hlmBreadcrumbLink link="/">Inicio</a>
+      </li>
+    }
+    @for (item of items(); track item.url; let last = $last) {
+      <li hlmBreadcrumbSeparator></li>
+      <li hlmBreadcrumbLink>
+        @if (last) {
+          <span hlmBreadcrumbPage>{{ item.label }}</span>
+        } @else {
+          <a hlmBreadcrumbLink [link]="item.url">{{ item.label }}</a>
+        }
+      </li>
+    } @empty {
+      <li hlmBreadcrumbItem>
+        <span hlmBreadcrumbPage>Inicio</span>
+      </li>
+    }
+  </ol>
+</nav>

@@ -1,0 +1,48 @@
+<button
+  hlmBtn
+  variant="ghost"
+  [hlmDropdownMenuTrigger]="userMenu"
+  align="end"
+  class="group rounded-full"
+>
+  <hlm-avatar>
+    <img hlmAvatarImage src="" alt="Avatar" />
+    <span hlmAvatarFallback>{{ 'Nickname' | initials }}</span>
+  </hlm-avatar>
+  <ng-icon
+    name="lucideChevronDown"
+    class="transition-transform duration-150 group-aria-expanded:rotate-180"
+  />
+</button>
+
+<ng-template #userMenu>
+  <hlm-dropdown-menu>
+    <hlm-dropdown-menu-group>
+      <hlm-dropdown-menu-label>
+        <div class="flex flex-col items-center gap-1">
+          <hlm-avatar size="lg" class="my-2">
+            <img hlmAvatarImage src="" alt="Avatar" />
+            <span hlmAvatarFallback>{{ 'Nickname' | initials }}</span>
+          </hlm-avatar>
+          <div class="flex flex-1 flex-col items-center gap-1">
+            <span>Nickname</span>
+            <span class="shimmer">{{ 'nickname@example.com' }}</span>
+            <span hlmBadge class="bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"
+              >Role</span
+            >
+          </div>
+        </div>
+      </hlm-dropdown-menu-label>
+      <hlm-dropdown-menu-separator />
+      <button hlmDropdownMenuItem class="group gap-4">
+        <ng-icon name="lucideUser" class="group-hover:fill-current" />
+        Mi perfil
+      </button>
+      <hlm-dropdown-menu-separator />
+      <button variant="destructive" hlmDropdownMenuItem class="gap-4">
+        <ng-icon name="lucideLogOut" />
+        Cerrar sesión
+      </button>
+    </hlm-dropdown-menu-group>
+  </hlm-dropdown-menu>
+</ng-template>

@@ -17,7 +17,18 @@
       "@spartan-ng/helm/dropdown-menu": [
         "./src/app/shared/ui/components/dropdown-menu/src/index.ts"
       ],
-      "@spartan-ng/helm/tooltip": ["./src/app/shared/ui/components/tooltip/src/index.ts"]
+      "@spartan-ng/helm/tooltip": ["./src/app/shared/ui/components/tooltip/src/index.ts"],
+      "@spartan-ng/helm/separator": ["./src/app/shared/ui/components/separator/src/index.ts"],
+      "@spartan-ng/helm/sidebar": ["./src/app/shared/ui/components/sidebar/src/index.ts"],
+      "@spartan-ng/helm/input": ["./src/app/shared/ui/components/input/src/index.ts"],
+      "@spartan-ng/helm/sheet": ["./src/app/shared/ui/components/sheet/src/index.ts"],
+      "@spartan-ng/helm/skeleton": ["./src/app/shared/ui/components/skeleton/src/index.ts"],
+      "@spartan-ng/helm/empty": ["./src/app/shared/ui/components/empty/src/index.ts"],
+      "@spartan-ng/helm/spinner": ["./src/app/shared/ui/components/spinner/src/index.ts"],
+      "@spartan-ng/helm/avatar": ["./src/app/shared/ui/components/avatar/src/index.ts"],
+      "@spartan-ng/helm/typography": ["./src/app/shared/ui/components/typography/src/index.ts"],
+      "@spartan-ng/helm/badge": ["./src/app/shared/ui/components/badge/src/index.ts"],
+      "@spartan-ng/helm/breadcrumb": ["./src/app/shared/ui/components/breadcrumb/src/index.ts"]
     }
   },
   "angularCompilerOptions": {

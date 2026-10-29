@@ -1,0 +1,25 @@
+<header class="bg-background sticky top-0 z-50 flex w-full items-center border-b">
+  <div class="flex h-(--header-height) w-full items-center gap-2 px-4">
+    <button class="rounded-full" hlmSidebarTrigger><span class="sr-only"></span></button>
+    <hlm-separator orientation="vertical" class="my-4 mr-2" />
+    <sigdosi-main-breadcrumb />
+    <div class="flex flex-1 items-center justify-center">
+      <a hlmBtn variant="link" routerLink="/" class="h-auto min-w-0 p-0">
+        <img src="icons/favicon.svg" alt="Logo" class="m-2 size-8 shrink-0 md:hidden" />
+        <span class="m-2 hidden text-2xl md:inline">SIGDOSI</span>
+        <span class="sr-only">Ir al inicio</span>
+      </a>
+    </div>
+    <hlm-separator orientation="vertical" class="my-4 ml-2" />
+    <sigdosi-theme-selector />
+    <hlm-separator orientation="vertical" class="my-4 mr-2" />
+    @if (true) {
+      <sigdosi-user-menu />
+    } @else {
+      <a hlmBtn variant="ghost" routerLink="/">
+        <ng-icon name="lucideLogIn" />
+        Inicia Sesión
+      </a>
+    }
+  </div>
+</header>

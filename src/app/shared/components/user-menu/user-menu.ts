@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { lucideChevronDown, lucideLogOut, lucideUser } from '@ng-icons/lucide';
+import { lucideChevronDown, lucideCircleUser, lucideLogOut } from '@ng-icons/lucide';
 import { InitialsPipe } from '@spartan-ng/brain/avatar';
 import { HlmAvatarImports } from '@spartan-ng/helm/avatar';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
@@ -19,6 +19,6 @@ import { HlmDropdownMenuImports } from '@spartan-ng/helm/dropdown-menu';
   selector: 'sigdosi-user-menu',
   styles: ``,
   templateUrl: './user-menu.html',
-  providers: [provideIcons({ lucideChevronDown, lucideUser, lucideLogOut })],
+  providers: [provideIcons({ lucideChevronDown, lucideCircleUser, lucideLogOut })],
 })
 export class UserMenu {}

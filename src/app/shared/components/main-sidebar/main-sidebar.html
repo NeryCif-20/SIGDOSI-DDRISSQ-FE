@@ -1,10 +1,34 @@
-<div hlmSidebarWrapper class="flex flex-col">
+<div hlmSidebarWrapper class="flex-col">
   <ng-content select="[header]" />
   <div class="flex flex-1">
     <hlm-sidebar
       variant="inset"
       sidebarContainerClass="top-(--header-height) h-[calc(100svh-var(--header-height))]"
     >
+      <hlm-sidebar-header>
+        <div class="m-4 flex flex-1 items-center justify-center gap-4 sm:flex-col">
+          <img src="icons/favicon.svg" alt="Logo" class="hidden size-24 sm:block" />
+          <span hlmH2>SIGDOSI</span>
+        </div>
+      </hlm-sidebar-header>
+      <hlm-sidebar-content></hlm-sidebar-content>
+      <hlm-sidebar-footer class="mt-auto">
+        <ul hlmSidebarMenu>
+          <li hlmSidebarMenuItem>
+            <a hlmSidebarMenuButton class="h-auto">
+              <div
+                class="text-sidebar-primary-foreground flex aspect-square items-center justify-center rounded-full bg-white"
+              >
+                <img src="images/ddrissq.svg" alt="Logo" class="size-12" />
+              </div>
+              <div class="grid flex-1 text-left text-sm leading-tight">
+                <span class="truncate font-medium">DDRISS</span>
+                <span class="truncate text-xs">Quetzaltenango</span>
+              </div>
+            </a>
+          </li>
+        </ul>
+      </hlm-sidebar-footer>
     </hlm-sidebar>
     <ng-content />
   </div>

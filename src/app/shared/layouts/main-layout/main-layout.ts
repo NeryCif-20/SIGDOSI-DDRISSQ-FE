@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MainSidebar } from '../../components/main-sidebar/main-sidebar';
 import { MainHeader } from '../../components/main-header/main-header';
 import { HlmSidebarImports } from '@spartan-ng/helm/sidebar';
 import { RouterOutlet } from '@angular/router';
+import { toast } from '@spartan-ng/brain/sonner';
 
 @Component({
   imports: [RouterOutlet, HlmSidebarImports, MainSidebar, MainHeader],
@@ -13,4 +14,8 @@ import { RouterOutlet } from '@angular/router';
     class: 'block [--header-height:--spacing(16)]',
   },
 })
-export class MainLayout {}
+export class MainLayout implements OnInit {
+  ngOnInit(): void {
+    toast.success('Bienvenido!!!');
+  }
+}

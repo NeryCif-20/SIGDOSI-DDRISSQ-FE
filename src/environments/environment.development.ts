@@ -1,1 +1,3 @@
-export const environment = {};
+export const environment = {
+  BASE_API: 'http://localhost:8000/api',
+};

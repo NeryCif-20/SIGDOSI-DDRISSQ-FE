@@ -1,0 +1,23 @@
+<form class="flex h-full flex-col justify-center gap-4" [formRoot]="identifyForm">
+  <hlm-field>
+    <label hlmFieldLabel for="email">Correo electrónico</label>
+    <input
+      id="emai"
+      hlmInput
+      placeholder="nick@example.com"
+      autocomplete="off"
+      [formField]="identifyForm.email"
+    />
+    @for (error of identifyForm.email().errors(); track error) {
+      <hlm-field-error [validator]="error.kind">
+        {{ error.message }}
+      </hlm-field-error>
+    }
+  </hlm-field>
+  <button hlmBtn [disabled]="identifyForm().submitting()">
+    @if (identifyForm().submitting()) {
+      <hlm-spinner />
+    }
+    Siguiente
+  </button>
+</form>

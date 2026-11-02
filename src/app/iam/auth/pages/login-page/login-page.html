@@ -1,0 +1,16 @@
+<div class="flex h-full flex-col gap-2">
+  @if (authService.step() !== 'CHECK_MAIL') {
+    <h2 hlmH2 class="mx-auto">Inicia Sesión</h2>
+  }
+  @switch (authService.step()) {
+    @case (null) {
+      <sigdosi-auth-identify-step class="flex-1" />
+    }
+    @case ('PASSWORD') {
+      <sigdosi-auth-password-step class="flex-1" />
+    }
+    @default {
+      <sigdosi-auth-password-action-feedback class="flex flex-1" />
+    }
+  }
+</div>

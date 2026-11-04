@@ -4,10 +4,10 @@ import { HlmFieldImports } from '@spartan-ng/helm/field';
 import { HlmInputImports } from '@spartan-ng/helm/input';
 import { HlmTypographyImports } from '@spartan-ng/helm/typography';
 import { HlmEmptyImports } from '@spartan-ng/helm/empty';
-import { IdentifyStep } from '../../components/identify-step/identify-step';
-import { PasswordStep } from '../../components/password-step/password-step';
-import { PasswordActionFeedback } from '../../components/password-action-feedback/password-action-feedback';
 import { AuthService } from '../../services/auth-service';
+import { CheckMailStep } from './components/check-mail-step/check-mail-step';
+import { IdentifyStep } from './components/identify-step/identify-step';
+import { PasswordStep } from './components/password-step/password-step';
 
 @Component({
   imports: [
@@ -18,7 +18,7 @@ import { AuthService } from '../../services/auth-service';
     HlmEmptyImports,
     IdentifyStep,
     PasswordStep,
-    PasswordActionFeedback,
+    CheckMailStep,
   ],
   selector: 'sigdosi-login-page',
   styles: ``,

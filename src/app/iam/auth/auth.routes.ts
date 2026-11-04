@@ -13,6 +13,11 @@ const routes: Routes = [
         title: 'Inicio de sesión',
       },
       {
+        path: 'setup-password',
+        loadComponent: () => import('./pages/setup-password-page/setup-password-page'),
+        title: 'Configuracion de contraseña',
+      },
+      {
         path: '',
         pathMatch: 'full',
         redirectTo: 'login',

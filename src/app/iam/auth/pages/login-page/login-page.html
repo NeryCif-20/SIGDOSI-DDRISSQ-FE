@@ -1,16 +1,16 @@
-<div class="flex h-full flex-col gap-2">
+<div class="flex h-full flex-col gap-8 sm:gap-2">
   @if (authService.step() !== 'CHECK_MAIL') {
-    <h2 hlmH2 class="mx-auto">Inicia Sesión</h2>
+    <h2 hlmH2 class="mx-auto text-center">Inicia Sesión</h2>
   }
   @switch (authService.step()) {
-    @case (null) {
+    @case ('EMAIL') {
       <sigdosi-auth-identify-step class="flex-1" />
     }
     @case ('PASSWORD') {
       <sigdosi-auth-password-step class="flex-1" />
     }
     @default {
-      <sigdosi-auth-password-action-feedback class="flex flex-1" />
+      <sigdosi-auth-check-mail-step class="flex flex-1" />
     }
   }
 </div>

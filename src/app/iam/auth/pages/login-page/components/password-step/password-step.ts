@@ -4,12 +4,13 @@ import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmFieldImports } from '@spartan-ng/helm/field';
 import { HlmInputImports } from '@spartan-ng/helm/input';
 import { HlmSpinnerImports } from '@spartan-ng/helm/spinner';
-import { LoginData } from '../../types/auth-types';
 import { firstValueFrom } from 'rxjs';
-import { AuthService } from '../../services/auth-service';
-import { ErrorHandler } from '../../../../shared/services/error-handler';
+import { PasswordInput } from '../../../../../../shared/components/password-input/password-input';
+import { AuthService } from '../../../../services/auth-service';
+import { LoginData } from '../../../../types/auth-types';
+import { ErrorHandler } from '../../../../../../shared/services/error-handler';
 import { Router } from '@angular/router';
-import { PasswordInput } from '../../../../shared/components/password-input/password-input';
+import { toast } from '@spartan-ng/brain/sonner';
 
 @Component({
   imports: [
@@ -35,20 +36,26 @@ export class PasswordStep {
     password: '',
   });
 
-  private readonly isRequesting = this._isRequesting.asReadonly();
+  protected readonly isRequesting = this._isRequesting.asReadonly();
   protected readonly loginForm = form(
     this.loginModel,
-    (schemaPath) => {
-      required(schemaPath.password, { message: 'La contraseña es obligatoria' });
+    (path) => {
+      required(path.password, { message: 'La contraseña es obligatoria' });
     },
     {
       submission: {
         action: async (form) => {
           try {
             await firstValueFrom(this.authService.login(form().value()));
-            this.router.navigateByUrl('/', {
-              replaceUrl: true,
-            });
+            this.router
+              .navigateByUrl('/', {
+                replaceUrl: true,
+              })
+              .then((result) => {
+                if (result) {
+                  toast.success(`Bienvenido`);
+                }
+              });
           } catch (error) {
             this.errorHandler.handle(error);
           }

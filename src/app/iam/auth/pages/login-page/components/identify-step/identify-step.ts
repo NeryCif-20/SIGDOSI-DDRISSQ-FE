@@ -1,13 +1,14 @@
 import { Component, inject, signal } from '@angular/core';
-import { form, required, FormRoot, FormField } from '@angular/forms/signals';
+import { form, required, FormRoot, FormField, email } from '@angular/forms/signals';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmFieldImports } from '@spartan-ng/helm/field';
 import { HlmInputImports } from '@spartan-ng/helm/input';
 import { HlmSpinnerImports } from '@spartan-ng/helm/spinner';
 import { firstValueFrom } from 'rxjs';
-import { IdentifyData } from '../../types/auth-types';
-import { AuthService } from '../../services/auth-service';
-import { ErrorHandler } from '../../../../shared/services/error-handler';
+import { AuthService } from '../../../../services/auth-service';
+import { ErrorHandler } from '../../../../../../shared/services/error-handler';
+import { IdentifyData } from '../../../../types/auth-types';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   imports: [
@@ -32,8 +33,9 @@ export class IdentifyStep {
 
   protected readonly identifyForm = form(
     this.identifyModel,
-    (schemaPath) => {
-      required(schemaPath.email, { message: 'El correo electrónico es obligatorio' });
+    (path) => {
+      required(path.email, { message: 'El correo electrónico es obligatorio' });
+      email(path.email, { message: 'El correo electrónico debe tener un formato válido' });
     },
     {
       submission: {
@@ -41,7 +43,7 @@ export class IdentifyStep {
           try {
             await firstValueFrom(this.authService.indentify(form().value()));
           } catch (error: unknown) {
-            this.errorHandler.handle(error);
+            if (error instanceof HttpErrorResponse) this.errorHandler.handle(error);
           }
         },
       },

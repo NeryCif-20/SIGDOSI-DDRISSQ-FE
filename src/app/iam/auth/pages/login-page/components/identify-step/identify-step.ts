@@ -5,10 +5,9 @@ import { HlmFieldImports } from '@spartan-ng/helm/field';
 import { HlmInputImports } from '@spartan-ng/helm/input';
 import { HlmSpinnerImports } from '@spartan-ng/helm/spinner';
 import { firstValueFrom } from 'rxjs';
-import { AuthService } from '../../../../services/auth-service';
-import { ErrorHandler } from '../../../../../../shared/services/error-handler';
 import { IdentifyData } from '../../../../types/auth-types';
-import { HttpErrorResponse } from '@angular/common/http';
+import { LoginStore } from '../../store/login-store';
+import { Autofocus } from '../../../../../../shared/directives/autofocus';
 
 @Component({
   imports: [
@@ -18,14 +17,14 @@ import { HttpErrorResponse } from '@angular/common/http';
     HlmSpinnerImports,
     FormRoot,
     FormField,
+    Autofocus,
   ],
   selector: 'sigdosi-auth-identify-step',
   styles: ``,
   templateUrl: './identify-step.html',
 })
 export class IdentifyStep {
-  private readonly authService = inject(AuthService);
-  private readonly errorHandler = inject(ErrorHandler);
+  private readonly loginStore = inject(LoginStore);
 
   private readonly identifyModel = signal<IdentifyData>({
     email: '',
@@ -41,9 +40,9 @@ export class IdentifyStep {
       submission: {
         action: async (form) => {
           try {
-            await firstValueFrom(this.authService.indentify(form().value()));
-          } catch (error: unknown) {
-            if (error instanceof HttpErrorResponse) this.errorHandler.handle(error);
+            await firstValueFrom(this.loginStore.identify(form().value()));
+          } catch {
+            return;
           }
         },
       },

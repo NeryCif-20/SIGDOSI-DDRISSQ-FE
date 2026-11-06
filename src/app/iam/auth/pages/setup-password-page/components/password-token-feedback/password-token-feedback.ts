@@ -1,12 +1,12 @@
 import { Component, computed, inject, OnInit } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, RouterLink } from '@angular/router';
-import { map, switchMap, timer } from 'rxjs';
+import { RouterLink } from '@angular/router';
+import { switchMap, timer } from 'rxjs';
 import { AuthService } from '../../../../services/auth-service';
 import { HlmEmptyImports } from '@spartan-ng/helm/empty';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideShieldEllipsis, lucideShieldX } from '@ng-icons/lucide';
+import { SetupPasswordStore } from '../../store/setup-password-store';
 
 interface PasswordTokenStatusFeedback {
   icon: string;
@@ -22,19 +22,11 @@ interface PasswordTokenStatusFeedback {
   providers: [provideIcons({ lucideShieldEllipsis, lucideShieldX })],
 })
 export class PasswordTokenFeedback implements OnInit {
-  private readonly activatedRoute = inject(ActivatedRoute);
-
+  protected readonly setupPasswordStore = inject(SetupPasswordStore);
   protected readonly authService = inject(AuthService);
 
-  private readonly token = toSignal(
-    this.activatedRoute.queryParamMap.pipe(map((params) => params.get('token')!)),
-    {
-      requireSync: true,
-    },
-  );
-
   protected readonly statusFeedback = computed<PasswordTokenStatusFeedback>(() => {
-    if (this.authService.passwordTokenStatus() === 'CHECKING') {
+    if (this.setupPasswordStore.tokenStatus() === 'CHECKING') {
       return {
         icon: 'lucideShieldEllipsis',
         title: 'Verificando Enlace',
@@ -50,7 +42,7 @@ export class PasswordTokenFeedback implements OnInit {
 
   ngOnInit(): void {
     timer(1000)
-      .pipe(switchMap(() => this.authService.validatePasswordToken({ token: this.token() })))
+      .pipe(switchMap(() => this.setupPasswordStore.validatePasswordToken()))
       .subscribe({
         error: () => undefined,
       });

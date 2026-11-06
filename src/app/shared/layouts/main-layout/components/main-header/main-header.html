@@ -12,10 +12,10 @@
     <hlm-separator orientation="vertical" class="ml-2" />
     <sigdosi-theme-selector />
     <hlm-separator orientation="vertical" class="mr-2" />
-    @if (true) {
-      <sigdosi-user-menu />
+    @if (isAuthenticated()) {
+      <sigdosi-main-user-menu />
     } @else {
-      <a hlmBtn variant="ghost" routerLink="/">
+      <a hlmBtn variant="ghost" routerLink="/auth">
         <ng-icon name="lucideLogIn" />
         Inicia Sesión
       </a>

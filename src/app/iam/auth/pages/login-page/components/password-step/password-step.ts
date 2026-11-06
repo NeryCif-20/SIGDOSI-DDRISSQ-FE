@@ -8,9 +8,9 @@ import { firstValueFrom } from 'rxjs';
 import { PasswordInput } from '../../../../../../shared/components/password-input/password-input';
 import { AuthService } from '../../../../services/auth-service';
 import { LoginData } from '../../../../types/auth-types';
-import { ErrorHandler } from '../../../../../../shared/services/error-handler';
 import { Router } from '@angular/router';
 import { toast } from '@spartan-ng/brain/sonner';
+import { LoginStore } from '../../store/login-store';
 
 @Component({
   imports: [
@@ -28,8 +28,8 @@ import { toast } from '@spartan-ng/brain/sonner';
 })
 export class PasswordStep {
   private readonly router = inject(Router);
+  private readonly loginStore = inject(LoginStore);
   private readonly authService = inject(AuthService);
-  private readonly errorHandler = inject(ErrorHandler);
 
   private readonly _isRequesting = signal(false);
   private readonly loginModel = signal<LoginData>({
@@ -47,27 +47,26 @@ export class PasswordStep {
         action: async (form) => {
           try {
             await firstValueFrom(this.authService.login(form().value()));
-            this.router
-              .navigateByUrl('/', {
-                replaceUrl: true,
-              })
-              .then((result) => {
-                if (result) {
-                  toast.success(`Bienvenido`);
-                }
+            const result = await this.router.navigateByUrl('/', {
+              replaceUrl: true,
+            });
+            if (result) {
+              toast.success(this.authService.user()!.firstName, {
+                description: 'Bienvenido!!!',
               });
-          } catch (error) {
-            this.errorHandler.handle(error);
+            }
+          } catch {
+            return;
           }
         },
       },
     },
   );
 
-  protected requestPasswordMail() {
+  protected handleRequestForgotPasswordMail() {
     this._isRequesting.set(true);
-    this.authService.requestForgotPasswordMail().subscribe({
-      error: this.errorHandler.handle,
+    this.loginStore.requestForgotPasswordMail().subscribe({
+      error: () => undefined,
       complete: () => this._isRequesting.set(false),
     });
   }

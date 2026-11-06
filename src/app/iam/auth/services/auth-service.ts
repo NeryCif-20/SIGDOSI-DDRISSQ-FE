@@ -1,105 +1,65 @@
-import { HttpClient } from '@angular/common/http';
 import { computed, inject, Service, signal } from '@angular/core';
-import { environment } from '@envs/environment';
-import {
-  AuthResponse,
-  AuthStep,
-  IdentifyData,
-  IdentifyResponse,
-  LoginData,
-  MailPurpose,
-  SetupPasswordData,
-  ValidatePasswordTokenData,
-} from '../types/auth-types';
-import { catchError, map, tap, throwError } from 'rxjs';
+import { User } from '../../users/user-types';
+import { AuthApiService } from './auth-api-service';
+import { AuthResponse, LoginData, SetupPasswordData } from '../types/auth-types';
+import { catchError, finalize, map, Observable, switchMap, throwError } from 'rxjs';
+import { UserApiService } from '../../users/services/user-api-service';
 
-interface AuthFlow {
-  step: AuthStep | 'EMAIL';
-  mailPurpose?: MailPurpose;
+type AuthStatus = 'CHECKING' | 'AUTHENTICATED' | 'NOT_AUTHENTICATED';
+
+interface AuthContext {
+  status: AuthStatus;
+  accessToken: string | null;
+  user: User | null;
 }
-
-type PasswordTokenStatus = 'CHECKING' | 'VALID' | 'INVALID';
-
-const AUTH_API = `${environment.BASE_API}/v1/auth`;
 
 @Service()
 export class AuthService {
-  private readonly httpClient = inject(HttpClient);
+  private readonly authApiService = inject(AuthApiService);
+  private readonly userApiService = inject(UserApiService);
 
-  private readonly _authFlow = signal<AuthFlow>({ step: 'EMAIL' });
-  private readonly _passwordTokenStatus = signal<PasswordTokenStatus>('CHECKING');
-  private readonly _accessToken = signal<string | null>(null);
+  private readonly context = signal<AuthContext>({
+    status: 'CHECKING',
+    accessToken: null,
+    user: null,
+  });
 
-  public readonly step = computed(() => this._authFlow().step);
-  public readonly isForgotPassword = computed(
-    () =>
-      this._authFlow().step === 'CHECK_MAIL' && this._authFlow().mailPurpose === 'RESET_PASSWORD',
-  );
-  public readonly passwordTokenStatus = this._passwordTokenStatus.asReadonly();
-  public readonly accessToken = this._accessToken.asReadonly();
+  public readonly status = computed(() => this.context().status);
+  public readonly accessToken = computed(() => this.context().accessToken);
+  public readonly user = computed(() => this.context().user);
 
-  private setupAuth({ accessToken }: AuthResponse) {
-    this._accessToken.set(accessToken);
-  }
-
-  public indentify(data: IdentifyData) {
-    const url = `${AUTH_API}/identify`;
-    return this.httpClient.post<IdentifyResponse>(url, data).pipe(
-      map(({ nextStep }) => {
-        const mailPurpose = nextStep === 'CHECK_MAIL' ? 'SET_PASSWORD' : undefined;
-        this._authFlow.set({
-          step: nextStep,
-          mailPurpose,
-        });
+  private authenticate(request$: Observable<AuthResponse>) {
+    return request$.pipe(
+      switchMap(({ accessToken }) => {
+        this.context.update((context) => ({ ...context, accessToken }));
+        return this.userApiService.getAuthenticatedUser();
       }),
+      map((user) =>
+        this.context.update((context) => ({ ...context, status: 'AUTHENTICATED', user: user })),
+      ),
+      catchError((error) => this.logout().pipe(switchMap(() => throwError(() => error)))),
     );
   }
 
   public login(data: LoginData) {
-    const url = `${AUTH_API}/login`;
-    return this.httpClient
-      .post<AuthResponse>(url, data)
-      .pipe(map((response) => this.setupAuth(response)));
-  }
-
-  public requestForgotPasswordMail() {
-    const url = `${AUTH_API}/password/forgot`;
-    return this.httpClient.post<void>(url, null).pipe(
-      tap(() => {
-        this._authFlow.set({
-          step: 'CHECK_MAIL',
-          mailPurpose: 'RESET_PASSWORD',
-        });
-      }),
-    );
-  }
-
-  public validatePasswordToken(data: ValidatePasswordTokenData) {
-    const url = `${AUTH_API}/password/token/validate`;
-    return this.httpClient.post<void>(url, data).pipe(
-      map(() => this._passwordTokenStatus.set('VALID')),
-      catchError((error) => {
-        this._passwordTokenStatus.set('INVALID');
-        return throwError(() => error);
-      }),
-    );
+    return this.authenticate(this.authApiService.login(data));
   }
 
   public setupPassword(data: SetupPasswordData) {
-    const url = `${AUTH_API}/password/setup`;
-    return this.httpClient.post<AuthResponse>(url, data).pipe(
-      map((response) => this.setupAuth(response)),
-      catchError((error) => {
-        this._passwordTokenStatus.set('INVALID');
-        return throwError(() => error);
-      }),
-    );
+    return this.authenticate(this.authApiService.setupPassword(data));
   }
 
   public refresh() {
-    const url = `${AUTH_API}/refresh`;
-    return this.httpClient
-      .post<AuthResponse>(url, null)
-      .pipe(map((response) => this.setupAuth(response)));
+    return this.authenticate(this.authApiService.refresh());
+  }
+
+  public logout() {
+    return this.authApiService
+      .logout()
+      .pipe(
+        finalize(() =>
+          this.context.set({ status: 'NOT_AUTHENTICATED', accessToken: null, user: null }),
+        ),
+      );
   }
 }

@@ -3,7 +3,7 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideMail } from '@ng-icons/lucide';
 import { HlmEmptyImports } from '@spartan-ng/helm/empty';
 import { HlmSpinnerImports } from '@spartan-ng/helm/spinner';
-import { AuthService } from '../../../../services/auth-service';
+import { LoginStore } from '../../store/login-store';
 
 @Component({
   imports: [HlmEmptyImports, HlmSpinnerImports, NgIcon],
@@ -13,9 +13,16 @@ import { AuthService } from '../../../../services/auth-service';
   providers: [provideIcons({ lucideMail })],
 })
 export class CheckMailStep {
-  private readonly authService = inject(AuthService);
+  private readonly loginStore = inject(LoginStore);
 
-  protected readonly title = computed(() =>
-    this.authService.isForgotPassword() ? 'Solicitud Enviada' : 'Establece una Contraseña',
-  );
+  protected readonly title = computed(() => {
+    switch (this.loginStore.mailPurpose()) {
+      case 'SET_PASSWORD':
+        return 'Establece una contraseña';
+      case 'RESET_PASSWORD':
+        return 'Solicitud Enviada';
+      default:
+        return undefined;
+    }
+  });
 }

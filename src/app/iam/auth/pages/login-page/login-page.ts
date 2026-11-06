@@ -4,10 +4,10 @@ import { HlmFieldImports } from '@spartan-ng/helm/field';
 import { HlmInputImports } from '@spartan-ng/helm/input';
 import { HlmTypographyImports } from '@spartan-ng/helm/typography';
 import { HlmEmptyImports } from '@spartan-ng/helm/empty';
-import { AuthService } from '../../services/auth-service';
 import { CheckMailStep } from './components/check-mail-step/check-mail-step';
 import { IdentifyStep } from './components/identify-step/identify-step';
 import { PasswordStep } from './components/password-step/password-step';
+import { LoginStore } from './store/login-store';
 
 @Component({
   imports: [
@@ -23,7 +23,8 @@ import { PasswordStep } from './components/password-step/password-step';
   selector: 'sigdosi-login-page',
   styles: ``,
   templateUrl: './login-page.html',
+  providers: [LoginStore],
 })
 export class LoginPage {
-  protected readonly authService = inject(AuthService);
+  protected readonly loginStore = inject(LoginStore);
 }

@@ -9,6 +9,12 @@ export const routes: Routes = [
   {
     path: '',
     component: MainLayout,
-    children: [],
+    children: [
+      {
+        path: 'permissions',
+        title: 'Permisos',
+        loadComponent: () => import('./iam/permissions/pages/permissions-page/permissions-page'),
+      },
+    ],
   },
 ];

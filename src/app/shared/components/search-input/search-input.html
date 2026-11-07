@@ -1,0 +1,12 @@
+<hlm-input-group>
+  <input
+    #search
+    hlmInputGroupInput
+    [placeholder]="placeholder()"
+    [value]="value()"
+    (input)="value.set(search.value)"
+  />
+  <hlm-input-group-addon>
+    <ng-icon name="lucideSearch" />
+  </hlm-input-group-addon>
+</hlm-input-group>

@@ -1,14 +1,14 @@
 import { inject, Service } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
-import { filter, map } from 'rxjs';
+import { filter, map, startWith } from 'rxjs';
 
 interface BreadcrumbItem {
   label: string;
   url: string;
 }
 
-@Service()
+@Service({ autoProvided: false })
 export class BreadcrumbService {
   private readonly router = inject(Router);
   private readonly activatedRoute = inject(ActivatedRoute);
@@ -16,10 +16,11 @@ export class BreadcrumbService {
   public readonly items = toSignal(
     this.router.events.pipe(
       filter((event) => event instanceof NavigationEnd),
+      startWith(null),
       map(() => this.buildItems()),
     ),
     {
-      initialValue: [],
+      requireSync: true,
     },
   );
 

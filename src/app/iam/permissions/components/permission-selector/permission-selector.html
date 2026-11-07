@@ -1,0 +1,53 @@
+<hlm-dialog (closed)="q.set('')">
+  <button hlmDialogTrigger hlmBtn>Seleccionar</button>
+  <hlm-dialog-content *hlmDialogPortal="let context" class="w-full sm:min-w-lg">
+    <hlm-dialog-header>
+      <h2 hlmDialogTitle>Permisos</h2>
+      <p hlmDialogDescription>Marca los permisos que necesitas...</p>
+    </hlm-dialog-header>
+    <hlm-field>
+      <hlm-input-group>
+        <input
+          #search
+          hlmInputGroupInput
+          placeholder="Busca por módulo"
+          [value]="q()"
+          (input)="q.set(search.value)"
+        />
+        <hlm-input-group-addon>
+          <ng-icon name="lucideSearch" />
+        </hlm-input-group-addon>
+      </hlm-input-group>
+    </hlm-field>
+    <fieldset hlmFieldSet class="max-y-[60vh] grid grid-cols-1 overflow-y-auto sm:grid-cols-2">
+      @for (group of permissions() | keyvalue; track group.key) {
+        @let state = moduleState(group.value);
+        <hlm-field-group class="gap-2 rounded-lg border p-4">
+          <hlm-field orientation="horizontal">
+            <hlm-checkbox
+              [inputId]="group.key"
+              [checked]="state === 'all'"
+              [indeterminate]="state === 'some'"
+              (checkedChange)="toggleModule(group.value, $event)"
+            />
+            <label hlmFieldLabel [for]="group.key" class="truncate">{{ group.key }}</label>
+          </hlm-field>
+          <div class="flex flex-col gap-2 pl-8">
+            @for (permission of group.value; track permission.id) {
+              <hlm-field orientation="horizontal">
+                <hlm-checkbox
+                  [inputId]="permission.id"
+                  [checked]="isSelected(permission.id)"
+                  (checkedChange)="toggle(permission.id, $event)"
+                />
+                <label hlmFieldLabel [for]="permission.id">{{
+                  getActionLabel(permission.action)
+                }}</label>
+              </hlm-field>
+            }
+          </div>
+        </hlm-field-group>
+      }
+    </fieldset>
+  </hlm-dialog-content>
+</hlm-dialog>

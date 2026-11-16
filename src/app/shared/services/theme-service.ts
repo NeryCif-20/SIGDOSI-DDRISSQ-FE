@@ -1,13 +1,10 @@
 import { computed, DestroyRef, DOCUMENT, effect, inject, Service, signal } from '@angular/core';
 import { ThemePreference } from '../types/theme-types';
+import { isValidThemePreference } from '../utils/theme-util';
 
 const DARK_THEME_CLASS = 'dark';
 const THEME_STORAGE_KEY = 'theme';
 const DARK_SCHEMA_MEDIA_QUERY = '(prefers-color-scheme: dark)';
-
-function isThemePreference(value: unknown): value is ThemePreference {
-  return value === 'light' || value === 'dark' || value === 'system';
-}
 
 @Service()
 export class ThemeService {
@@ -41,7 +38,7 @@ export class ThemeService {
   private readStoredPreference(): ThemePreference {
     try {
       const stored = localStorage.getItem(THEME_STORAGE_KEY);
-      return isThemePreference(stored) ? stored : 'system';
+      return isValidThemePreference(stored) ? stored : 'system';
     } catch {
       return 'system';
     }

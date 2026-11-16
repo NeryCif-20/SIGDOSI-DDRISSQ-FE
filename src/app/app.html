@@ -11,6 +11,8 @@
     </hlm-empty>
   </div>
 } @else {
-  <router-outlet />
-  <hlm-toaster position="bottom-center" />
+  <div class="transition-opacity duration-1000 starting:opacity-0">
+    <router-outlet />
+    <hlm-toaster position="bottom-center" />
+  </div>
 }

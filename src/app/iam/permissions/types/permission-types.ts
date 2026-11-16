@@ -1,4 +1,8 @@
-export type PermissionAction = 'CREATE' | 'READ' | 'DELETE' | 'UPDATE';
+import { Pageable } from '../../../shared/types/pagination-types';
+
+export const PERMISSION_ACTIONS = ['CREATE', 'READ', 'DELETE', 'UPDATE'];
+
+export type PermissionAction = (typeof PERMISSION_ACTIONS)[number];
 
 export const PERMISSION_ACTION_LABELS: Record<PermissionAction, string> = {
   CREATE: 'Crear',
@@ -16,7 +20,19 @@ export interface Permission extends PermissionData {
   id: string;
 }
 
-export interface PermissionFilters {
-  q?: string;
-  action?: PermissionAction;
+export interface PermissionQueryParams extends Pageable {
+  search?: string;
+  actions?: PermissionAction[];
 }
+
+export interface PermissionActionOption {
+  value: PermissionAction;
+  label: string;
+}
+
+export const PERMISSION_ACTION_OPTIONS: PermissionActionOption[] = (
+  Object.entries(PERMISSION_ACTION_LABELS) as [PermissionAction, string][]
+).map(([value, label]) => ({
+  value,
+  label,
+}));

@@ -1,6 +1,6 @@
-import { Component, inject, model, signal } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { NgIcon, provideIcons } from '@ng-icons/core';
+import { Component, inject, linkedSignal, model, signal } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { provideIcons } from '@ng-icons/core';
 import { lucideSearch } from '@ng-icons/lucide';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmDialogImports } from '@spartan-ng/helm/dialog';
@@ -8,8 +8,6 @@ import { HlmFieldImports } from '@spartan-ng/helm/field';
 import { HlmInputImports } from '@spartan-ng/helm/input';
 import { HlmInputGroupImports } from '@spartan-ng/helm/input-group';
 import { PermissionApiService } from '../../services/permission-api-service';
-import { catchError, distinctUntilChanged, map, of, switchMap, timer } from 'rxjs';
-import { groupBy } from '../../../../shared/utils/arrays-util';
 import {
   Permission,
   PermissionAction,
@@ -17,10 +15,11 @@ import {
 } from '../../types/permission-types';
 import { KeyValuePipe } from '@angular/common';
 import { HlmCheckboxImports } from '@spartan-ng/helm/checkbox';
+import { SearchInput } from '../../../../shared/components/search-input/search-input';
+import { map } from 'rxjs';
+import { groupBy } from '../../../../shared/utils/arrays-util';
 
-type PermissionsByModule = Record<string, Permission[]>;
-
-type PermissionsByModuleState = 'all' | 'some' | 'none';
+type SelectionState = 'all' | 'some' | 'none';
 
 @Component({
   imports: [
@@ -29,9 +28,9 @@ type PermissionsByModuleState = 'all' | 'some' | 'none';
     HlmFieldImports,
     HlmInputGroupImports,
     HlmInputImports,
-    NgIcon,
     KeyValuePipe,
     HlmCheckboxImports,
+    SearchInput,
   ],
   selector: 'sigdosi-permission-selector',
   styles: ``,
@@ -43,20 +42,23 @@ export class PermissionSelector {
 
   private readonly permissionApiService = inject(PermissionApiService);
 
-  protected readonly q = signal('');
+  protected readonly searchTerm = signal('');
 
-  protected readonly permissions = toSignal(
-    toObservable(this.q).pipe(
-      switchMap((q, index) => (index === 0 ? of(q) : timer(500).pipe(map(() => q)))),
-      distinctUntilChanged(),
-      switchMap((q) => this.permissionApiService.getAll({ q })),
-      map(({ content }) => groupBy(content, (permission) => permission.module)),
-      catchError(() => of({} as PermissionsByModule)),
-    ),
-    {
-      initialValue: {} as PermissionsByModule,
-    },
-  );
+  private readonly resource = rxResource({
+    params: () => ({ search: this.searchTerm() }),
+    stream: ({ params }) =>
+      this.permissionApiService
+        .getAll({ search: params.search })
+        .pipe(map((response) => groupBy(response.content, (permission) => permission.module))),
+  });
+
+  protected readonly permissions = linkedSignal<
+    Record<string, Permission[]> | undefined,
+    Record<string, Permission[]>
+  >({
+    source: () => this.resource.value(),
+    computation: (current, previous) => current ?? previous?.value ?? {},
+  });
 
   protected isSelected(id: string) {
     return this.selected().has(id);
@@ -88,7 +90,7 @@ export class PermissionSelector {
     });
   }
 
-  protected moduleState(permissions: Permission[]): PermissionsByModuleState {
+  protected moduleState(permissions: Permission[]): SelectionState {
     const count = permissions.filter((permission) => this.selected().has(permission.id)).length;
     if (count === 0) return 'none';
     return count === permissions.length ? 'all' : 'some';

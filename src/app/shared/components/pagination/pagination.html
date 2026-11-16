@@ -1,0 +1,82 @@
+<div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
+  <div class="flex items-center gap-3">
+    <span hlmMuted class="whitespace-nowrap">Elementos por pagina:</span>
+    <hlm-select [value]="elementsPerPage()" (valueChange)="elementsPerPageChange.emit($event!)">
+      <hlm-select-trigger class="w-20">
+        <hlm-select-value />
+      </hlm-select-trigger>
+      <hlm-select-content *hlmSelectPortal>
+        @for (size of pageSizes(); track size) {
+          <hlm-select-item [value]="size">
+            {{ size }}
+          </hlm-select-item>
+        }
+      </hlm-select-content>
+    </hlm-select>
+  </div>
+  <nav hlmPagination>
+    <ul hlmPaginationContent>
+      @if (currentPage() > 1) {
+        <li hlmPaginationItem>
+          <a hlmPaginationLink link="." [queryParams]="{ page: 1 }" queryParamsHandling="merge">
+            <ng-icon name="lucideChevronsLeft" />
+          </a>
+        </li>
+        <li hlmPaginationItem>
+          <hlm-pagination-previous
+            iconOnly
+            link="."
+            [queryParams]="{ page: currentPage() - 1 }"
+            queryParamsHandling="merge"
+          />
+        </li>
+      }
+      @for (page of range(); track $index) {
+        <li hlmPaginationItem>
+          <a
+            hlmPaginationLink
+            [link]="currentPage() !== page ? '.' : undefined"
+            [queryParams]="{ page }"
+            queryParamsHandling="merge"
+            [isActive]="currentPage() === page"
+          >
+            {{ page }}
+          </a>
+        </li>
+      }
+      @if (currentPage() < pages()) {
+        <li hlmPaginationItem>
+          <hlm-pagination-next
+            iconOnly
+            link="."
+            [queryParams]="{ page: currentPage() + 1 }"
+            queryParamsHandling="merge"
+          />
+        </li>
+        <li hlmPaginationItem>
+          <a
+            hlmPaginationLink
+            link="."
+            [queryParams]="{ page: pages() }"
+            queryParamsHandling="merge"
+          >
+            <ng-icon name="lucideChevronsRight" />
+          </a>
+        </li>
+      }
+    </ul>
+  </nav>
+  <div class="flex items-center gap-2 py-2">
+    <span class="text-sm font-semibold">
+      {{ totalElements() }}
+    </span>
+    <span hlmMuted class="whitespace-nowrap"
+      >{{ totalElements() !== 1 ? 'elementos' : 'elemento' }} en total</span
+    >
+    <hlm-separator orientation="vertical" class="border" />
+    <span class="text-sm font-semibold">
+      {{ pages() }}
+    </span>
+    <span hlmMuted>{{ pages() !== 1 ? 'páginas' : 'página' }}</span>
+  </div>
+</div>

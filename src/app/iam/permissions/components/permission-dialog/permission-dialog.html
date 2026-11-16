@@ -1,0 +1,78 @@
+@if (action() === 'delete') {
+  <hlm-dialog-header>
+    <h3 hlmDialogTitle>¿Estás seguro?</h3>
+    <p hlmDialogDescription>
+      Esta acción no se puede deshacer. Esto eliminara permanentemente el permiso.
+    </p>
+  </hlm-dialog-header>
+  <hlm-dialog-footer>
+    <button hlmBtn variant="outline" [disabled]="isRequesting()" hlmDialogClose>Cancelar</button>
+    <button hlmBtn variant="destructive" [disabled]="isRequesting()" (click)="deletePermission()">
+      Eliminar
+    </button>
+  </hlm-dialog-footer>
+} @else {
+  <hlm-dialog-header>
+    <h3 hlmDialogTitle>{{ action() === 'create' ? 'Crea un permiso' : 'Actualiza el permiso' }}</h3>
+    <p hlmDialogDescription>
+      {{
+        `${action() === 'create' ? 'Completa' : 'Edita'} los campos del formulario para registrar la información.`
+      }}
+    </p>
+  </hlm-dialog-header>
+  <form [formRoot]="permissionForm" id="permissionForm">
+    <hlm-field-group class="gap-4">
+      <hlm-field>
+        <label hlmFieldLabel for="module">Módulo</label>
+        <input
+          hlmInput
+          id="module"
+          placeholder="Usuarios, establecimientos, planos..."
+          [formField]="permissionForm.module"
+        />
+        @for (error of permissionForm.module().errors(); track error.kind) {
+          <hlm-field-error [validator]="error.kind">
+            {{ error.message }}
+          </hlm-field-error>
+        }
+      </hlm-field>
+      <hlm-field>
+        <label hlmFieldLabel for="confirmPassword">Confirma tu contraseña</label>
+        <hlm-combobox [formField]="permissionForm.action" [itemToString]="getActionLabel">
+          <hlm-combobox-input
+            placeholder="Crear, actualizar, ver..."
+            [showClear]="permissionForm.action().value() !== ''"
+          />
+          <hlm-combobox-content *hlmComboboxPortal>
+            @for (option of options; track $index) {
+              <hlm-combobox-item [value]="option.value">{{ option.label }}</hlm-combobox-item>
+            }
+          </hlm-combobox-content>
+        </hlm-combobox>
+        @for (error of permissionForm.action().errors(); track error.kind) {
+          <hlm-field-error [validator]="error.kind">
+            {{ error.message }}
+          </hlm-field-error>
+        }
+      </hlm-field>
+    </hlm-field-group>
+  </form>
+  <hlm-dialog-footer>
+    <button
+      hlmBtn
+      variant="outline"
+      type="button"
+      [disabled]="permissionForm().submitting()"
+      hlmDialogClose
+    >
+      Cancelar
+    </button>
+    <button hlmBtn form="permissionForm" [disabled]="permissionForm().submitting()">
+      @if (permissionForm().submitting()) {
+        <hlm-spinner />
+      } @else {
+        Guardar
+      }
+    </button>
+  </hlm-dialog-footer>
+}

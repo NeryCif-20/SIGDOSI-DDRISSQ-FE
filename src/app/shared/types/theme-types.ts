@@ -1,1 +1,3 @@
-export type ThemePreference = 'light' | 'dark' | 'system';
+export const THEME_PREFERENCES = ['light', 'dark', 'system'];
+
+export type ThemePreference = (typeof THEME_PREFERENCES)[number];

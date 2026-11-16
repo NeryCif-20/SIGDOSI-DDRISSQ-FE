@@ -100,6 +100,7 @@
 
 @theme {
   --animate-gradient: gradient-flow 16s ease infinite;
+
   @keyframes gradient-flow {
     0%,
     100% {

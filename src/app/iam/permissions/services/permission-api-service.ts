@@ -1,9 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
 import { environment } from '@envs/environment';
-import { Permission, PermissionData, PermissionFilters } from '../types/permission-types';
+import { Permission, PermissionData, PermissionQueryParams } from '../types/permission-types';
 import { toHttpQueryParams } from '../../../shared/utils/http-params-util';
-import { Page } from '../../../shared/types/shared-types';
+import { Page } from '../../../shared/types/pagination-types';
 
 const PERMISSIONS_API = `${environment.BASE_API}/v1/permissions`;
 
@@ -13,7 +13,7 @@ export class PermissionApiService {
 
   public get(id: string) {
     const url = `${PERMISSIONS_API}/${id}`;
-    return this.httpClient.get(url);
+    return this.httpClient.get<Permission>(url);
   }
 
   public create(data: PermissionData) {
@@ -25,7 +25,12 @@ export class PermissionApiService {
     return this.httpClient.patch<Permission>(url, data);
   }
 
-  public getAll(filters: PermissionFilters) {
+  public delete(id: string) {
+    const url = `${PERMISSIONS_API}/${id}`;
+    return this.httpClient.delete<void>(url);
+  }
+
+  public getAll(filters: PermissionQueryParams) {
     const params = toHttpQueryParams(filters);
     return this.httpClient.get<Page<Permission>>(PERMISSIONS_API, { params });
   }

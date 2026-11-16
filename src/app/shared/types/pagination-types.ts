@@ -8,3 +8,9 @@ export interface Page<E> {
   totalElements: number;
   totalPages: number;
 }
+
+export interface Pageable {
+  page?: number;
+  size?: number;
+  sort?: string[];
+}

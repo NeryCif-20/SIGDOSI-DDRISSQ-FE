@@ -1,16 +1,36 @@
 <div class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
-  <sigdosi-search-input placeholder="Busca por módulo..." (valueChange)="updateQ($event)" />
-  <hlm-select (valueChange)="updateAction($event)" [itemToString]="actionToString">
-    <hlm-select-trigger class="w-full sm:w-1/2">
-      <hlm-select-value placeholder="Acción" />
-    </hlm-select-trigger>
-    <hlm-select-content *hlmSelectPortal>
-      <hlm-select-group>
-        <hlm-select-item [value]="null">Ninguno</hlm-select-item>
-        @for (option of options; track option.value) {
-          <hlm-select-item [value]="option.value">{{ option.label }}</hlm-select-item>
+  <sigdosi-search-input
+    placeholder="Buscar por módulo..."
+    [value]="searchTerm()"
+    (valueChange)="searchTermChange.emit($event)"
+  />
+  <hlm-combobox-multiple
+    [value]="selectedActions()"
+    (valueChange)="selectedActionsChange.emit($event!)"
+    [itemToString]="getActionLabel"
+    autoHighlight
+  >
+    <hlm-combobox-chips>
+      <ng-template hlmComboboxValues let-values>
+        @for (value of values; track value) {
+          <hlm-combobox-chip [value]="value">{{ getActionLabel(value) }}</hlm-combobox-chip>
         }
-      </hlm-select-group>
-    </hlm-select-content>
-  </hlm-select>
+      </ng-template>
+      <input hlmComboboxChipInput placeholder="Agregar acciones..." />
+    </hlm-combobox-chips>
+    <hlm-combobox-content *hlmComboboxPortal>
+      <hlm-combobox-empty>No se encontraron acciones</hlm-combobox-empty>
+      <div hlmComboboxList>
+        @for (option of options; track option.value) {
+          <hlm-combobox-item [value]="option.value">
+            {{ option.label }}
+          </hlm-combobox-item>
+        }
+      </div>
+    </hlm-combobox-content>
+  </hlm-combobox-multiple>
+  <button hlmBtn variant="secondary" class="sm:w-1/2" (click)="cleanFilters.emit()">
+    <ng-icon name="lucideFilterX" />
+    Limpiar filtros
+  </button>
 </div>

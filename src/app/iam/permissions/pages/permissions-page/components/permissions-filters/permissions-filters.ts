@@ -1,48 +1,42 @@
-import { Component, signal } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { HlmInputImports } from '@spartan-ng/helm/input';
 import { HlmInputGroupImports } from '@spartan-ng/helm/input-group';
-import { HlmSelectImports } from '@spartan-ng/helm/select';
 import {
   PERMISSION_ACTION_LABELS,
+  PERMISSION_ACTION_OPTIONS,
   PermissionAction,
-  PermissionFilters,
 } from '../../../../types/permission-types';
 import { SearchInput } from '../../../../../../shared/components/search-input/search-input';
-import { outputFromObservable, toObservable } from '@angular/core/rxjs-interop';
-import { skip } from 'rxjs';
-
-interface ActionLabelOption {
-  value: PermissionAction;
-  label: string;
-}
-
-const ACTION_LABELS_OPTIONS: ActionLabelOption[] = (
-  Object.entries(PERMISSION_ACTION_LABELS) as [PermissionAction, string][]
-).map(([value, label]) => ({
-  value,
-  label,
-}));
+import { HlmComboboxImports } from '@spartan-ng/helm/combobox';
+import { HlmButtonImports } from '@spartan-ng/helm/button';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { lucideFilterX } from '@ng-icons/lucide';
 
 @Component({
-  imports: [HlmInputGroupImports, HlmInputImports, HlmSelectImports, SearchInput],
+  imports: [
+    HlmInputGroupImports,
+    HlmInputImports,
+    HlmComboboxImports,
+    HlmButtonImports,
+    NgIcon,
+    SearchInput,
+  ],
   selector: 'sigdosi-permissions-filters',
   styles: ``,
   templateUrl: './permissions-filters.html',
+  providers: [provideIcons({ lucideFilterX })],
 })
 export class PermissionsFilters {
-  private readonly filters = signal<PermissionFilters>({});
+  public readonly searchTerm = input.required<string>();
+  public readonly selectedActions = input.required<PermissionAction[]>();
 
-  public readonly filtersChange = outputFromObservable(toObservable(this.filters).pipe(skip(1)));
+  public readonly searchTermChange = output<string>();
+  public readonly selectedActionsChange = output<PermissionAction[]>();
+  public readonly cleanFilters = output();
 
-  protected readonly options = ACTION_LABELS_OPTIONS;
-  protected readonly actionToString = (action: PermissionAction) =>
-    PERMISSION_ACTION_LABELS[action];
+  protected readonly options = PERMISSION_ACTION_OPTIONS;
 
-  protected updateQ(q?: string) {
-    this.filters.update((filters) => ({ ...filters, q }));
-  }
-
-  protected updateAction(action?: PermissionAction | null) {
-    this.filters.update((filters) => ({ ...filters, action: action ?? undefined }));
+  protected getActionLabel(action: PermissionAction) {
+    return PERMISSION_ACTION_LABELS[action];
   }
 }

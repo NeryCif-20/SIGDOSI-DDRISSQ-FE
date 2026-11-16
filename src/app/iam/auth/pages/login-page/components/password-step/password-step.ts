@@ -52,7 +52,7 @@ export class PasswordStep {
             });
             if (result) {
               toast.success(this.authService.user()!.firstName, {
-                description: 'Bienvenido!!!',
+                description: 'Bienvenido!!! ',
               });
             }
           } catch {

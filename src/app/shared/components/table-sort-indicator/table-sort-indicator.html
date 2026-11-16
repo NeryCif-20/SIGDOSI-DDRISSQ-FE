@@ -1,0 +1,11 @@
+@if (!header().isPlaceholder) {
+  <ng-container
+    *flexRender="header().column.columnDef.header; props: header().getContext(); let label"
+  >
+    <span class="sr-only">Ordernar por: {{ label }}</span>
+    @if (header().column.getCanSort()) {
+      <ng-icon [name]="icon()" />
+    }
+    {{ label }}
+  </ng-container>
+}

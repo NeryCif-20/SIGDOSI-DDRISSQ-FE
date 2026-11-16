@@ -23,7 +23,7 @@ export class App implements OnInit {
 
   ngOnInit(): void {
     this._isLoading.set(true);
-    timer(1500)
+    timer(500)
       .pipe(
         switchMap(() => this.authService.refresh()),
         catchError(() => EMPTY),

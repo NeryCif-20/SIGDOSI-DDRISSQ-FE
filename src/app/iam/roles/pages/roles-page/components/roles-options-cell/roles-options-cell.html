@@ -1,0 +1,25 @@
+<button
+  hlmBtn
+  variant="ghost"
+  [hlmDropdownMenuTrigger]="options"
+  align="center"
+  class="rounded-full"
+>
+  <ng-icon name="lucideEllipsis" />
+  <span class="sr-only">Opciones</span>
+</button>
+
+<ng-template #options>
+  <hlm-dropdown-menu>
+    <hlm-dropdown-menu-group>
+      <button hlmDropdownMenuItem class="group" (click)="openUpdateDialog()">
+        <ng-icon name="lucidePencil" class="group-hover:fill-current" />
+        Editar
+      </button>
+      <button hlmDropdownMenuItem variant="destructive" class="group" (click)="openDeleteDialog()">
+        <ng-icon name="lucideTrash" class="group-hover:fill-current" />
+        Eliminar
+      </button>
+    </hlm-dropdown-menu-group>
+  </hlm-dropdown-menu>
+</ng-template>

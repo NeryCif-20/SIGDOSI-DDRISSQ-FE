@@ -24,7 +24,6 @@ export class PermissionsOptionsCell {
         action: 'update',
         permissionId: this.id(),
       },
-      contentClass: 'p-4',
       showCloseButton: false,
     });
   }
@@ -35,7 +34,7 @@ export class PermissionsOptionsCell {
         action: 'delete',
         permissionId: this.id(),
       },
-      contentClass: 'sm:max-w-sm p-4',
+      contentClass: 'sm:max-w-sm',
       showCloseButton: false,
     });
   }

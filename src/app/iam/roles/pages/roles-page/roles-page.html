@@ -1,0 +1,20 @@
+<sigdosi-roles-header />
+<sigdosi-roles-filters
+  [searchTerm]="filters().search"
+  (searchTermChange)="onSearchTermChange($event)"
+  [selectedPermissions]="filters().permissions"
+  (selectedPermissionsChange)="onSelectedPermissionsChange($event)"
+/>
+<sigdosi-roles-table
+  [data]="response().content"
+  [sortValues]="filters().sort"
+  (sortValuesChange)="onSortValuesChange($event)"
+/>
+<sigdosi-pagination
+  [totalElements]="response().totalElements"
+  [currentPage]="filters().page"
+  [elementsPerPage]="filters().size"
+  [pageSizes]="pageSizes"
+  (currentPageChange)="onCurrentPageChange($event)"
+  (elementsPerPageChange)="onElementsPerPageChange($event)"
+/>

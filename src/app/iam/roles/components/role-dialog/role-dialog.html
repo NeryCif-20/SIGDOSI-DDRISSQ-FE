@@ -1,0 +1,68 @@
+@if (action() === 'delete') {
+  <hlm-dialog-header>
+    <h3 hlmDialogTitle>¿Estás seguro?</h3>
+    <p hlmDialogDescription>
+      Esta acción no se puede deshacer. Esto eliminara permanentemente el rol.
+    </p>
+  </hlm-dialog-header>
+  <hlm-dialog-footer>
+    <button hlmBtn variant="outline" [disabled]="isRequesting()" hlmDialogClose>Cancelar</button>
+    <button hlmBtn variant="destructive" [disabled]="isRequesting()" (click)="deleteRole()">
+      Eliminar
+    </button>
+  </hlm-dialog-footer>
+} @else {
+  <hlm-dialog-header>
+    <h3 hlmDialogTitle>{{ action() === 'create' ? 'Crea un rol' : 'Actualiza el rol' }}</h3>
+    <p hlmDialogDescription>
+      {{
+        `${action() === 'create' ? 'Completa' : 'Edita'} los campos del formulario para registrar la información.`
+      }}
+    </p>
+  </hlm-dialog-header>
+  <form [formRoot]="roleForm" id="roleForm">
+    <hlm-field-group class="mb-4 gap-4">
+      <hlm-field>
+        <label hlmFieldLabel for="name">Nombre</label>
+        <input hlmInput id="name" placeholder="Administrador..." [formField]="roleForm.name" />
+        @for (error of roleForm.name().errors(); track error.kind) {
+          <hlm-field-error [validator]="error.kind">
+            {{ error.message }}
+          </hlm-field-error>
+        }
+      </hlm-field>
+      <hlm-field>
+        <label hlmFieldLabel for="description">Descripción</label>
+        <textarea
+          hlmTextarea
+          class="max-h-40 overflow-y-auto"
+          id="description"
+          placeholder="Describe el rol..."
+          [formField]="roleForm.description"
+        ></textarea>
+      </hlm-field>
+    </hlm-field-group>
+    <sigdosi-permission-selector
+      [openButtonText]="`${action() === 'create' ? 'Agregar' : 'Modificar'} permisos...`"
+      (selectedChange)="onSelectedChange($event)"
+    />
+  </form>
+  <hlm-dialog-footer>
+    <button
+      hlmBtn
+      variant="outline"
+      type="button"
+      [disabled]="roleForm().submitting()"
+      hlmDialogClose
+    >
+      Cancelar
+    </button>
+    <button hlmBtn form="roleForm" [disabled]="roleForm().submitting()">
+      @if (roleForm().submitting()) {
+        <hlm-spinner />
+      } @else {
+        Guardar
+      }
+    </button>
+  </hlm-dialog-footer>
+}

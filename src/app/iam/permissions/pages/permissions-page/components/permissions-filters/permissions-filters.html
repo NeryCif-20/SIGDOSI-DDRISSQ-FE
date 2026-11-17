@@ -1,12 +1,12 @@
-<div class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+<div class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-12">
   <sigdosi-search-input
+    class="sm:col-span-4"
     placeholder="Buscar por módulo..."
-    [value]="searchTerm()"
-    (valueChange)="searchTermChange.emit($event)"
+    [(value)]="searchTerm"
   />
   <hlm-combobox-multiple
-    [value]="selectedActions()"
-    (valueChange)="selectedActionsChange.emit($event!)"
+    class="sm:col-span-5"
+    [(value)]="selectedActions"
     [itemToString]="getActionLabel"
     autoHighlight
   >
@@ -29,7 +29,7 @@
       </div>
     </hlm-combobox-content>
   </hlm-combobox-multiple>
-  <button hlmBtn variant="secondary" class="sm:w-1/2" (click)="cleanFilters.emit()">
+  <button hlmBtn variant="secondary" class="sm:col-span-2" (click)="cleanFilters.emit()">
     <ng-icon name="lucideFilterX" />
     Limpiar filtros
   </button>

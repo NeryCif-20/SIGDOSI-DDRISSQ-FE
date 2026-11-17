@@ -1,17 +1,35 @@
 <hlm-dialog (closed)="searchTerm.set('')">
-  <button hlmDialogTrigger hlmBtn>Seleccionar</button>
-  <hlm-dialog-content *hlmDialogPortal="let context" class="w-full sm:min-w-lg">
-    <hlm-dialog-header>
-      <h2 hlmDialogTitle>Permisos</h2>
-      <p hlmDialogDescription>Marca los permisos que necesitas.</p>
-    </hlm-dialog-header>
-    <sigdosi-search-input [(value)]="searchTerm" />
+  <button
+    hlmDialogTrigger
+    [variant]="readonly() ? 'ghost' : 'default'"
+    hlmBtn
+    [class]="readonly() ? 'rounded-full' : 'w-full'"
+  >
+    @if (readonly()) {
+      <ng-icon name="lucideEye" />
+    } @else {
+      {{ openButtonText() }}
+    }
+  </button>
+  <hlm-dialog-content
+    *hlmDialogPortal="let context"
+    class="w-full sm:min-w-lg"
+    [showCloseButton]="false"
+  >
+    @if (!readonly()) {
+      <hlm-dialog-header>
+        <h2 hlmDialogTitle>Permisos</h2>
+        <p hlmDialogDescription>Marca los permisos que necesitas.</p>
+      </hlm-dialog-header>
+      <sigdosi-search-input [(value)]="searchTerm" />
+    }
     <fieldset hlmFieldSet class="max-y-[60vh] grid grid-cols-1 overflow-y-auto sm:grid-cols-2">
       @for (group of permissions() | keyvalue; track group.key) {
         @let state = moduleState(group.value);
         <hlm-field-group class="gap-0 overflow-hidden rounded-lg border">
           <hlm-field orientation="horizontal" class="bg-muted/50 border-b p-4">
             <hlm-checkbox
+              [disabled]="readonly()"
               [inputId]="group.key"
               [checked]="state === 'all'"
               [indeterminate]="state === 'some'"
@@ -23,6 +41,7 @@
             @for (permission of group.value; track permission.id) {
               <hlm-field orientation="horizontal">
                 <hlm-checkbox
+                  [disabled]="readonly()"
                   [inputId]="permission.id"
                   [checked]="isSelected(permission.id)"
                   (checkedChange)="toggle(permission.id, $event)"
@@ -36,5 +55,8 @@
         </hlm-field-group>
       }
     </fieldset>
+    <hlm-dialog-footer>
+      <button hlmBtn hlmDialogClose>{{ closeButtonText() }}</button>
+    </hlm-dialog-footer>
   </hlm-dialog-content>
 </hlm-dialog>

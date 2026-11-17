@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, model, output } from '@angular/core';
 import { HlmInputImports } from '@spartan-ng/helm/input';
 import { HlmInputGroupImports } from '@spartan-ng/helm/input-group';
 import {
@@ -27,11 +27,9 @@ import { lucideFilterX } from '@ng-icons/lucide';
   providers: [provideIcons({ lucideFilterX })],
 })
 export class PermissionsFilters {
-  public readonly searchTerm = input.required<string>();
-  public readonly selectedActions = input.required<PermissionAction[]>();
+  public readonly searchTerm = model.required<string>();
+  public readonly selectedActions = model.required<PermissionAction[]>();
 
-  public readonly searchTermChange = output<string>();
-  public readonly selectedActionsChange = output<PermissionAction[]>();
   public readonly cleanFilters = output();
 
   protected readonly options = PERMISSION_ACTION_OPTIONS;

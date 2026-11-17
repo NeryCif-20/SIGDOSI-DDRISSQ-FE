@@ -8,7 +8,7 @@ import {
   PermissionData,
 } from '../../types/permission-types';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { firstValueFrom, of } from 'rxjs';
+import { finalize, firstValueFrom, of } from 'rxjs';
 import { form, maxLength, minLength, required, FormRoot, FormField } from '@angular/forms/signals';
 import { toast } from '@spartan-ng/brain/sonner';
 import { HlmDialogImports } from '@spartan-ng/helm/dialog';
@@ -62,7 +62,7 @@ export class PermissionDialog {
 
   protected readonly permissionResource = rxResource({
     params: () => ({
-      action: this.action(),
+      action: this._action(),
       id: this.permissionId(),
     }),
     defaultValue: INITIAL_STATE,
@@ -91,7 +91,7 @@ export class PermissionDialog {
         action: async (form) => {
           try {
             const data = form().value();
-            const action = this.action();
+            const action = this._action();
             await firstValueFrom(
               action === 'create'
                 ? this.permissionApiService.create(data)
@@ -115,13 +115,15 @@ export class PermissionDialog {
 
   protected deletePermission() {
     this._isRequesting.set(true);
-    this.permissionApiService.delete(this.permissionId()!).subscribe({
-      next: () => {
-        this.dialogRef.close();
-        toast.success('Permiso eliminado correctamente');
-      },
-      error: () => undefined,
-      complete: () => this._isRequesting.set(false),
-    });
+    this.permissionApiService
+      .delete(this.permissionId()!)
+      .pipe(finalize(() => this._isRequesting.set(false)))
+      .subscribe({
+        next: () => {
+          this.dialogRef.close();
+          toast.success('Permiso eliminado correctamente');
+        },
+        error: () => undefined,
+      });
   }
 }

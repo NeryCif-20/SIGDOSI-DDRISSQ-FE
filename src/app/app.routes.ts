@@ -15,6 +15,11 @@ export const routes: Routes = [
         title: 'Permisos',
         loadComponent: () => import('./iam/permissions/pages/permissions-page/permissions-page'),
       },
+      {
+        path: 'roles',
+        title: 'Roles',
+        loadComponent: () => import('./iam/roles/pages/roles-page/roles-page'),
+      },
     ],
   },
 ];

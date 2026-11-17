@@ -1,0 +1,44 @@
+<div class="mb-8 overflow-hidden rounded-md border">
+  <div hlmTableContainer>
+    <table hlmTable>
+      <thead hlmTHead>
+        @for (headerGroup of table.getHeaderGroups(); track headerGroup.id) {
+          <tr hlmTr>
+            @for (header of headerGroup.headers; track header.id) {
+              <th
+                hlmTh
+                [attr.colSpan]="header.colSpan"
+                [tanStackTableHeader]="header"
+                (click)="header.column.getToggleSortingHandler()?.($event)"
+                [style.witdth.tx]="header.getSize()"
+              >
+                <sigdosi-table-sort-indicator />
+              </th>
+            }
+          </tr>
+        }
+      </thead>
+      <tbody hlmTBody>
+        @for (row of table.getRowModel().rows; track row.id) {
+          <tr hlmTr>
+            @for (cell of row.getAllCells(); track cell.id) {
+              <td hlmTd [style.width.px]="cell.column.getSize()">
+                <ng-container
+                  *flexRender="cell.column.columnDef.cell; props: cell.getContext(); let cell"
+                >
+                  {{ cell }}
+                </ng-container>
+              </td>
+            }
+          </tr>
+        } @empty {
+          <tr hlmTr>
+            <td hlmTd class="text-center" [attr.colSpan]="table.getAllLeafColumns().length">
+              No hay resultados.
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

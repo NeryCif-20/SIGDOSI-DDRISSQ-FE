@@ -1,0 +1,16 @@
+<div class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-6">
+  <sigdosi-search-input
+    class="sm:col-span-2"
+    placeholder="Buscar por nombre..."
+    [(value)]="searchTerm"
+  />
+  <sigdosi-permission-selector
+    class="sm:col-span-1"
+    openButtonText="Buscar por permisos..."
+    [(selected)]="selectedPermissions"
+  />
+  <button hlmBtn variant="secondary" class="sm:col-span-1" (click)="cleanFilters.emit()">
+    <ng-icon name="lucideFilterX" />
+    Limpiar filtros
+  </button>
+</div>

@@ -1,7 +1,7 @@
-import { Component, inject, linkedSignal, model, signal } from '@angular/core';
+import { Component, inject, input, linkedSignal, model, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { provideIcons } from '@ng-icons/core';
-import { lucideSearch } from '@ng-icons/lucide';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { lucideEye } from '@ng-icons/lucide';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmDialogImports } from '@spartan-ng/helm/dialog';
 import { HlmFieldImports } from '@spartan-ng/helm/field';
@@ -31,14 +31,18 @@ type SelectionState = 'all' | 'some' | 'none';
     KeyValuePipe,
     HlmCheckboxImports,
     SearchInput,
+    NgIcon,
   ],
   selector: 'sigdosi-permission-selector',
   styles: ``,
   templateUrl: './permission-selector.html',
-  providers: [provideIcons({ lucideSearch })],
+  providers: [provideIcons({ lucideEye })],
 })
 export class PermissionSelector {
-  public readonly selected = model<ReadonlySet<string>>(new Set());
+  public readonly readonly = input<string | boolean>(false);
+  public readonly openButtonText = input<string>('Seleccionar');
+  public readonly closeButtonText = input<string>('Listo');
+  public readonly selected = model<string[]>([]);
 
   private readonly permissionApiService = inject(PermissionApiService);
 
@@ -61,37 +65,32 @@ export class PermissionSelector {
   });
 
   protected isSelected(id: string) {
-    return this.selected().has(id);
+    return this.selected().includes(id);
   }
 
   protected toggle(id: string, checked: boolean) {
-    this.selected.update((current) => {
-      const next = new Set(current);
-      if (checked) {
-        next.add(id);
-      } else {
-        next.delete(id);
-      }
-      return next;
-    });
+    this.selected.update((current) =>
+      checked
+        ? current.includes(id)
+          ? current
+          : [...current, id]
+        : current.filter((value) => value !== id),
+    );
   }
 
   protected toggleModule(permissions: Permission[], checked: boolean) {
-    this.selected.update((prev) => {
-      const next = new Set(prev);
-      for (const permission of permissions) {
-        if (checked) {
-          next.add(permission.id);
-        } else {
-          next.delete(permission.id);
-        }
-      }
-      return next;
+    this.selected.update((current) => {
+      const ids = permissions.map((permission) => permission.id);
+      return checked
+        ? [...new Set([...current, ...ids])]
+        : current.filter((id) => !ids.includes(id));
     });
   }
 
   protected moduleState(permissions: Permission[]): SelectionState {
-    const count = permissions.filter((permission) => this.selected().has(permission.id)).length;
+    const count = permissions.filter((permission) =>
+      this.selected().includes(permission.id),
+    ).length;
     if (count === 0) return 'none';
     return count === permissions.length ? 'all' : 'some';
   }

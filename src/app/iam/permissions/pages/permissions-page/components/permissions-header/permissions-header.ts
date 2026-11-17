@@ -22,7 +22,6 @@ export class PermissionsHeader {
       context: {
         action: 'create',
       },
-      contentClass: 'p-4',
       showCloseButton: false,
     });
   }

@@ -37,8 +37,12 @@
         }
       </hlm-field>
       <hlm-field>
-        <label hlmFieldLabel for="confirmPassword">Confirma tu contraseña</label>
-        <hlm-combobox [formField]="permissionForm.action" [itemToString]="getActionLabel">
+        <label hlmFieldLabel for="action">Acción</label>
+        <hlm-combobox
+          id="action"
+          [formField]="permissionForm.action"
+          [itemToString]="getActionLabel"
+        >
           <hlm-combobox-input
             placeholder="Crear, actualizar, ver..."
             [showClear]="permissionForm.action().value() !== ''"

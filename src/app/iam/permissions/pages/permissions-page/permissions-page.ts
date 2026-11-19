@@ -40,7 +40,7 @@ export default class PermissionsPage {
   protected readonly query = injectQuery(() => {
     const filters = { ...this.filters() };
     return {
-      queryKey: ['permissions', { ...filters }],
+      queryKey: ['permissions', filters],
       queryFn: () => firstValueFrom(this.permissionApiService.getAll(filters)),
       placeholderData: (previousData) =>
         previousData ?? createEmptyPage(filters.page, filters.size),

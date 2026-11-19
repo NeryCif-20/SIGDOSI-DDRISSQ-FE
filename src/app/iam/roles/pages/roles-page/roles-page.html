@@ -4,6 +4,7 @@
   (searchTermChange)="onSearchTermChange($event)"
   [selectedPermissions]="filters().permissions"
   (selectedPermissionsChange)="onSelectedPermissionsChange($event)"
+  (cleanFilters)="onCleanFilters()"
 />
 <sigdosi-roles-table
   [data]="query.data()!.content"

@@ -55,6 +55,10 @@ export default class RolesPage {
     this.queryParams.patch({ permissions });
   }
 
+  protected onCleanFilters() {
+    this.queryParams.patch({ search: '', permissions: [] });
+  }
+
   protected onSortValuesChange(sort: string[]) {
     this.queryParams.patch({ sort });
   }

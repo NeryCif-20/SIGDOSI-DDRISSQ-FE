@@ -21,7 +21,7 @@ export class RolesOptionsCell {
   protected openUpdateDialog() {
     this.dialog.open(RoleDialog, {
       context: {
-        action: 'update',
+        action: 'edit',
         roleId: this.id(),
       },
       showCloseButton: false,

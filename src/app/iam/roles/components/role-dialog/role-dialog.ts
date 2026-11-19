@@ -1,4 +1,4 @@
-import { Component, inject, linkedSignal, signal } from '@angular/core';
+import { Component, computed, inject, linkedSignal, signal } from '@angular/core';
 import { form, FormField, FormRoot, maxLength, minLength, required } from '@angular/forms/signals';
 import { BrnDialogRef, injectBrnDialogContext } from '@spartan-ng/brain/dialog';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
@@ -8,11 +8,11 @@ import { HlmInputImports } from '@spartan-ng/helm/input';
 import { HlmSpinnerImports } from '@spartan-ng/helm/spinner';
 import { RoleData } from '../../types/role-types';
 import { RoleApiService } from '../../services/role-api-service';
-import { rxResource } from '@angular/core/rxjs-interop';
-import { finalize, firstValueFrom, map, of } from 'rxjs';
+import { firstValueFrom, map, of } from 'rxjs';
 import { toast } from '@spartan-ng/brain/sonner';
 import { HlmTextarea } from '@spartan-ng/helm/textarea';
 import { PermissionSelector } from '../../../permissions/components/permission-selector/permission-selector';
+import { injectMutation, injectQuery, QueryClient } from '@tanstack/angular-query';
 
 interface RoleDialogContext {
   action: 'create' | 'edit' | 'delete';
@@ -48,32 +48,89 @@ export class RoleDialog {
   private readonly context = injectBrnDialogContext<RoleDialogContext>();
   private readonly dialogRef = inject(BrnDialogRef);
   private readonly roleApiService = inject(RoleApiService);
+  private readonly queryClient = inject(QueryClient);
 
   private readonly roleId = signal(this.context.roleId);
   private readonly _action = signal(this.context.action);
-  private readonly _isRequesting = signal(false);
 
-  protected readonly action = this._action.asReadonly();
-  protected readonly isRequesting = this._isRequesting.asReadonly();
-
-  protected readonly roleResource = rxResource({
-    params: () => ({ id: this.roleId(), action: this._action() }),
-    defaultValue: INITIAL_STATE,
-    stream: ({ params }) => {
-      if (params.action === 'create') {
-        return of(INITIAL_STATE);
-      }
-      return this.roleApiService.get(params.id!).pipe(
-        map((role) => {
-          const description = role.description === undefined ? '' : role.description;
-          const permissions = role.permissions.map((permission) => permission.id);
-          return { ...role, description, permissions };
-        }),
-      );
-    },
+  private readonly query = injectQuery(() => {
+    const id = this.roleId();
+    return {
+      queryKey: ['role', 'dialog', id],
+      queryFn: () =>
+        firstValueFrom(
+          this._action() === 'create'
+            ? of(INITIAL_STATE)
+            : this.roleApiService.get(id!).pipe(
+                map((role) => {
+                  const description = role.description === undefined ? '' : role.description;
+                  const permissions = role.permissions.map((permission) => permission.id);
+                  return { ...role, description, permissions };
+                }),
+              ),
+        ),
+    };
   });
 
-  private readonly roleModel = linkedSignal(() => this.roleResource.value());
+  protected readonly saveMutation = injectMutation(() => {
+    const action = this._action();
+    const id = this.roleId();
+    return {
+      mutationFn: (data: RoleData) =>
+        firstValueFrom(
+          action === 'create'
+            ? this.roleApiService.create(data)
+            : this.roleApiService.update(id!, data),
+        ),
+      onSuccess: () => {
+        this.queryClient.invalidateQueries({
+          predicate: (query) => query.queryKey.includes('roles'),
+        });
+        this.dialogRef.close();
+        toast.success(`Rol ${action === 'create' ? 'creado' : 'actualizado'} correctamente`);
+      },
+    };
+  });
+  protected readonly deleteMutation = injectMutation(() => ({
+    mutationFn: () => firstValueFrom(this.roleApiService.delete(this.roleId()!)),
+    onSuccess: () => {
+      this.queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey.includes('roles'),
+      });
+      this.dialogRef.close();
+      toast.success('Rol eliminado correctamente');
+    },
+  }));
+
+  private readonly roleModel = linkedSignal(() => this.query.data() ?? INITIAL_STATE);
+
+  protected readonly header = computed(() => {
+    switch (this._action()) {
+      case 'delete':
+        return {
+          title: '¿Estás seguro?',
+          description: 'Esta acción no se puede deshacer. Esto eliminará permanentemente el rol.',
+        };
+      case 'create':
+        return {
+          title: 'Agrega un rol',
+          description: 'Completa los campos del formulario para registrar la información.',
+        };
+      default:
+        return {
+          title: 'Actualiza el rol',
+          description: 'Edita los campos del formulario para registrar la información.',
+        };
+    }
+  });
+
+  protected readonly action = this._action.asReadonly();
+
+  protected readonly isBusy = computed(() =>
+    this._action() === 'delete'
+      ? this.deleteMutation.isPending() || this.deleteMutation.isSuccess()
+      : this.saveMutation.isPending() || this.saveMutation.isSuccess(),
+  );
 
   protected readonly roleForm = form(
     this.roleModel,
@@ -84,21 +141,7 @@ export class RoleDialog {
     },
     {
       submission: {
-        action: async (form) => {
-          try {
-            const data = form().value();
-            const action = this._action();
-            await firstValueFrom(
-              action === 'create'
-                ? this.roleApiService.create(data)
-                : this.roleApiService.update(this.roleId()!, data),
-            );
-            this.dialogRef.close();
-            toast.success(`Rol ${action === 'create' ? 'creado' : 'actualizado'} correctamente`);
-          } catch {
-            return;
-          }
-        },
+        action: async (form) => this.saveMutation.mutate(form().value()),
       },
     },
   );
@@ -108,19 +151,5 @@ export class RoleDialog {
       ...value,
       permissions,
     }));
-  }
-
-  protected deleteRole() {
-    this._isRequesting.set(true);
-    this.roleApiService
-      .delete(this.roleId()!)
-      .pipe(finalize(() => this._isRequesting.set(false)))
-      .subscribe({
-        next: () => {
-          this.dialogRef.close();
-          toast.success('Rol eliminado correctamente');
-        },
-        error: () => undefined,
-      });
   }
 }

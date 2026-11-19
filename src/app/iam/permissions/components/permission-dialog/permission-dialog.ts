@@ -1,4 +1,4 @@
-import { Component, inject, linkedSignal, signal } from '@angular/core';
+import { Component, computed, inject, linkedSignal, signal } from '@angular/core';
 import { BrnDialogRef, injectBrnDialogContext } from '@spartan-ng/brain/dialog';
 import { PermissionApiService } from '../../services/permission-api-service';
 import {
@@ -7,8 +7,7 @@ import {
   PermissionAction,
   PermissionData,
 } from '../../types/permission-types';
-import { rxResource } from '@angular/core/rxjs-interop';
-import { finalize, firstValueFrom, of } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import { form, maxLength, minLength, required, FormRoot, FormField } from '@angular/forms/signals';
 import { toast } from '@spartan-ng/brain/sonner';
 import { HlmDialogImports } from '@spartan-ng/helm/dialog';
@@ -17,6 +16,12 @@ import { HlmFieldImports } from '@spartan-ng/helm/field';
 import { HlmInputImports } from '@spartan-ng/helm/input';
 import { HlmComboboxImports } from '@spartan-ng/helm/combobox';
 import { HlmSpinnerImports } from '@spartan-ng/helm/spinner';
+import {
+  injectMutation,
+  injectQuery,
+  keepPreviousData,
+  QueryClient,
+} from '@tanstack/angular-query';
 
 interface PermissionDialogContext {
   action: 'create' | 'edit' | 'delete';
@@ -50,32 +55,85 @@ export class PermissionDialog {
   private readonly context = injectBrnDialogContext<PermissionDialogContext>();
   private readonly dialogRef = inject(BrnDialogRef);
   private readonly permissionApiService = inject(PermissionApiService);
+  private readonly queryClient = inject(QueryClient);
 
   private readonly permissionId = signal(this.context.permissionId);
   private readonly _action = signal(this.context.action);
-  private readonly _isRequesting = signal(false);
 
   protected readonly options = PERMISSION_ACTION_OPTIONS;
 
-  protected readonly action = this._action.asReadonly();
-  protected readonly isRequesting = this._isRequesting.asReadonly();
-
-  protected readonly permissionResource = rxResource({
-    params: () => ({
-      action: this._action(),
-      id: this.permissionId(),
-    }),
-    defaultValue: INITIAL_STATE,
-    stream: ({ params }) => {
-      if (params.action === 'create') {
-        return of(INITIAL_STATE);
-      }
-      return this.permissionApiService.get(params.id!);
-    },
+  private readonly query = injectQuery(() => {
+    const id = this.permissionId();
+    const action = this._action();
+    return {
+      queryKey: ['permission', 'dialog', id],
+      queryFn: () =>
+        firstValueFrom(
+          action === 'create' ? of(INITIAL_STATE) : this.permissionApiService.get(id!),
+        ),
+      initialData: INITIAL_STATE,
+      placeholderData: keepPreviousData,
+    };
   });
 
-  private readonly permissionModel = linkedSignal<PermissionData>(() =>
-    this.permissionResource.value(),
+  protected readonly saveMutation = injectMutation(() => {
+    const action = this._action();
+    return {
+      mutationFn: (data: PermissionData) =>
+        firstValueFrom(
+          action === 'create'
+            ? this.permissionApiService.create(data)
+            : this.permissionApiService.update(this.permissionId()!, data),
+        ),
+      onSuccess: () => {
+        this.queryClient.invalidateQueries({
+          predicate: (query) => query.queryKey.includes('permissions'),
+        });
+        this.dialogRef.close();
+        toast.success(`Permiso ${action === 'create' ? 'creado' : 'actualizado'} correctamente`);
+      },
+    };
+  });
+  protected readonly deleteMutation = injectMutation(() => ({
+    mutationFn: () => firstValueFrom(this.permissionApiService.delete(this.permissionId()!)),
+    onSuccess: () => {
+      this.queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey.includes('permissions'),
+      });
+      this.dialogRef.close();
+      toast.success('Permiso eliminado correctamente');
+    },
+  }));
+
+  private readonly permissionModel = linkedSignal<PermissionData>(() => this.query.data());
+
+  protected readonly header = computed(() => {
+    switch (this._action()) {
+      case 'delete':
+        return {
+          title: '¿Estás seguro?',
+          description:
+            'Esta acción no se puede deshacer. Esto eliminará permanentemente el permiso.',
+        };
+      case 'create':
+        return {
+          title: 'Crea un permiso',
+          description: 'Completa los campos del formulario para registrar la información.',
+        };
+      default:
+        return {
+          title: 'Actualiza el permiso',
+          description: 'Edita los campos del formulario para registrar la información.',
+        };
+    }
+  });
+
+  protected readonly action = this._action.asReadonly();
+
+  protected readonly isBusy = computed(() =>
+    this._action() === 'delete'
+      ? this.deleteMutation.isPending() || this.deleteMutation.isSuccess()
+      : this.saveMutation.isPending() || this.saveMutation.isSuccess(),
   );
 
   protected readonly permissionForm = form(
@@ -88,42 +146,12 @@ export class PermissionDialog {
     },
     {
       submission: {
-        action: async (form) => {
-          try {
-            const data = form().value();
-            const action = this._action();
-            await firstValueFrom(
-              action === 'create'
-                ? this.permissionApiService.create(data)
-                : this.permissionApiService.update(this.permissionId()!, data),
-            );
-            this.dialogRef.close();
-            toast.success(
-              `Permiso ${action === 'create' ? 'creado' : 'actualizado'} correctamente`,
-            );
-          } catch {
-            return;
-          }
-        },
+        action: async (form) => this.saveMutation.mutate(form().value()),
       },
     },
   );
 
   protected getActionLabel(action: PermissionAction) {
     return PERMISSION_ACTION_LABELS[action];
-  }
-
-  protected deletePermission() {
-    this._isRequesting.set(true);
-    this.permissionApiService
-      .delete(this.permissionId()!)
-      .pipe(finalize(() => this._isRequesting.set(false)))
-      .subscribe({
-        next: () => {
-          this.dialogRef.close();
-          toast.success('Permiso eliminado correctamente');
-        },
-        error: () => undefined,
-      });
   }
 }

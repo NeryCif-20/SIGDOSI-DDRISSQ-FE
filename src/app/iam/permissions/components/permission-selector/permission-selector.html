@@ -16,29 +16,28 @@
     class="w-full sm:min-w-lg"
     [showCloseButton]="false"
   >
-    @if (!readonly()) {
-      <hlm-dialog-header>
-        <h2 hlmDialogTitle>Permisos</h2>
+    <hlm-dialog-header>
+      <h2 hlmDialogTitle>Permisos</h2>
+      @if (!readonly()) {
         <p hlmDialogDescription>Marca los permisos que necesitas.</p>
-      </hlm-dialog-header>
-      <sigdosi-search-input [(value)]="searchTerm" />
-    }
-    <fieldset hlmFieldSet class="max-y-[60vh] grid grid-cols-1 overflow-y-auto sm:grid-cols-2">
-      @for (group of permissions() | keyvalue; track group.key) {
-        @let state = moduleState(group.value);
+      }
+    </hlm-dialog-header>
+    <sigdosi-search-input [(value)]="searchTerm" placeholder="Buscar por modulo..." />
+    <fieldset hlmFieldSet class="grid max-h-[60vh] grid-cols-1 overflow-y-auto sm:grid-cols-2">
+      @for (group of groups(); track group.module) {
         <hlm-field-group class="gap-0 overflow-hidden rounded-lg border">
           <hlm-field orientation="horizontal" class="bg-muted/50 border-b p-4">
             <hlm-checkbox
               [disabled]="readonly()"
-              [inputId]="group.key"
-              [checked]="state === 'all'"
-              [indeterminate]="state === 'some'"
-              (checkedChange)="toggleModule(group.value, $event)"
+              [inputId]="group.module"
+              [checked]="group.state === 'all'"
+              [indeterminate]="group.state === 'some'"
+              (checkedChange)="toggleModule(group.items, $event)"
             />
-            <label hlmFieldLabel [for]="group.key" class="truncate">{{ group.key }}</label>
+            <label hlmFieldLabel [for]="group.module" class="truncate">{{ group.module }}</label>
           </hlm-field>
           <div class="flex flex-col gap-2 p-4 pl-11">
-            @for (permission of group.value; track permission.id) {
+            @for (permission of group.items; track permission.id) {
               <hlm-field orientation="horizontal">
                 <hlm-checkbox
                   [disabled]="readonly()"
@@ -53,6 +52,13 @@
             }
           </div>
         </hlm-field-group>
+      } @empty {
+        <div
+          class="text-muted-foreground col-span-full flex flex-col items-center gap-2 py-8 text-center"
+        >
+          <ng-icon name="lucideSearchX" class="text-3xl" />
+          <p>Sin resultados.</p>
+        </div>
       }
     </fieldset>
     <hlm-dialog-footer>

@@ -1,25 +1,10 @@
-@if (action() === 'delete') {
-  <hlm-dialog-header>
-    <h3 hlmDialogTitle>¿Estás seguro?</h3>
-    <p hlmDialogDescription>
-      Esta acción no se puede deshacer. Esto eliminara permanentemente el rol.
-    </p>
-  </hlm-dialog-header>
-  <hlm-dialog-footer>
-    <button hlmBtn variant="outline" [disabled]="isRequesting()" hlmDialogClose>Cancelar</button>
-    <button hlmBtn variant="destructive" [disabled]="isRequesting()" (click)="deleteRole()">
-      Eliminar
-    </button>
-  </hlm-dialog-footer>
-} @else {
-  <hlm-dialog-header>
-    <h3 hlmDialogTitle>{{ action() === 'create' ? 'Crea un rol' : 'Actualiza el rol' }}</h3>
-    <p hlmDialogDescription>
-      {{
-        `${action() === 'create' ? 'Completa' : 'Edita'} los campos del formulario para registrar la información.`
-      }}
-    </p>
-  </hlm-dialog-header>
+<hlm-dialog-header>
+  <h3 hlmDialogTitle>{{ header().title }}</h3>
+  <p hlmDialogDescription>
+    {{ header().description }}
+  </p>
+</hlm-dialog-header>
+@if (action() !== 'delete') {
   <form [formRoot]="roleForm" id="roleForm">
     <hlm-field-group class="mb-4 gap-4">
       <hlm-field>
@@ -47,22 +32,24 @@
       (selectedChange)="onSelectedChange($event)"
     />
   </form>
-  <hlm-dialog-footer>
-    <button
-      hlmBtn
-      variant="outline"
-      type="button"
-      [disabled]="roleForm().submitting()"
-      hlmDialogClose
-    >
-      Cancelar
+}
+<hlm-dialog-footer>
+  <button hlmBtn variant="outline" [disabled]="isBusy()" hlmDialogClose>Cancelar</button>
+  @if (action() === 'delete') {
+    <button hlmBtn variant="destructive" [disabled]="isBusy()" (click)="deleteMutation.mutate()">
+      @if (isBusy()) {
+        <hlm-spinner />
+      } @else {
+        Eliminar
+      }
     </button>
-    <button hlmBtn form="roleForm" [disabled]="roleForm().submitting()">
-      @if (roleForm().submitting()) {
+  } @else {
+    <button hlmBtn form="roleForm" [disabled]="isBusy()">
+      @if (isBusy()) {
         <hlm-spinner />
       } @else {
         Guardar
       }
     </button>
-  </hlm-dialog-footer>
-}
+  }
+</hlm-dialog-footer>

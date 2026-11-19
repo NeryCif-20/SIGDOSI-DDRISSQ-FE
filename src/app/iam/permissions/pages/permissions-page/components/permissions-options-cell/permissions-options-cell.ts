@@ -21,7 +21,7 @@ export class PermissionsOptionsCell {
   protected openUpdateDialog() {
     this.dialog.open(PermissionDialog, {
       context: {
-        action: 'update',
+        action: 'edit',
         permissionId: this.id(),
       },
       showCloseButton: false,

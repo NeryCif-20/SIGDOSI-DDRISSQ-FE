@@ -1,7 +1,6 @@
-import { Component, inject, input, linkedSignal, model, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { Component, computed, inject, input, model, signal } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { lucideEye } from '@ng-icons/lucide';
+import { lucideEye, lucideSearchX } from '@ng-icons/lucide';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmDialogImports } from '@spartan-ng/helm/dialog';
 import { HlmFieldImports } from '@spartan-ng/helm/field';
@@ -13,10 +12,10 @@ import {
   PermissionAction,
   PERMISSION_ACTION_LABELS,
 } from '../../types/permission-types';
-import { KeyValuePipe } from '@angular/common';
 import { HlmCheckboxImports } from '@spartan-ng/helm/checkbox';
 import { SearchInput } from '../../../../shared/components/search-input/search-input';
-import { map } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
+import { injectQuery, keepPreviousData } from '@tanstack/angular-query';
 import { groupBy } from '../../../../shared/utils/arrays-util';
 
 type SelectionState = 'all' | 'some' | 'none';
@@ -28,7 +27,6 @@ type SelectionState = 'all' | 'some' | 'none';
     HlmFieldImports,
     HlmInputGroupImports,
     HlmInputImports,
-    KeyValuePipe,
     HlmCheckboxImports,
     SearchInput,
     NgIcon,
@@ -36,7 +34,7 @@ type SelectionState = 'all' | 'some' | 'none';
   selector: 'sigdosi-permission-selector',
   styles: ``,
   templateUrl: './permission-selector.html',
-  providers: [provideIcons({ lucideEye })],
+  providers: [provideIcons({ lucideEye, lucideSearchX })],
 })
 export class PermissionSelector {
   public readonly readonly = input<string | boolean>(false);
@@ -48,21 +46,26 @@ export class PermissionSelector {
 
   protected readonly searchTerm = signal('');
 
-  private readonly resource = rxResource({
-    params: () => ({ search: this.searchTerm() }),
-    stream: ({ params }) =>
-      this.permissionApiService
-        .getAll({ search: params.search })
-        .pipe(map((response) => groupBy(response.content, (permission) => permission.module))),
+  private readonly query = injectQuery(() => {
+    const search = this.searchTerm();
+    return {
+      queryKey: ['permissions', 'selector', search],
+      queryFn: () => firstValueFrom(this.permissionApiService.getAll({ search })),
+      placeholderData: keepPreviousData,
+    };
   });
 
-  protected readonly permissions = linkedSignal<
-    Record<string, Permission[]> | undefined,
-    Record<string, Permission[]>
-  >({
-    source: () => this.resource.value(),
-    computation: (current, previous) => current ?? previous?.value ?? {},
-  });
+  private readonly permissions = computed(() =>
+    groupBy(this.query.data()?.content ?? [], (permission) => permission.module),
+  );
+
+  protected readonly groups = computed(() =>
+    Object.entries(this.permissions()).map(([module, items]) => ({
+      module,
+      items,
+      state: this.moduleState(items),
+    })),
+  );
 
   protected isSelected(id: string) {
     return this.selected().includes(id);

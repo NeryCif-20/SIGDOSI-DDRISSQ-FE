@@ -6,12 +6,12 @@
   (selectedPermissionsChange)="onSelectedPermissionsChange($event)"
 />
 <sigdosi-roles-table
-  [data]="response().content"
+  [data]="query.data()!.content"
   [sortValues]="filters().sort"
   (sortValuesChange)="onSortValuesChange($event)"
 />
 <sigdosi-pagination
-  [totalElements]="response().totalElements"
+  [totalElements]="query.data()!.totalElements"
   [currentPage]="filters().page"
   [elementsPerPage]="filters().size"
   [pageSizes]="pageSizes"

@@ -1,19 +1,19 @@
-import { Component, computed, inject, linkedSignal } from '@angular/core';
+import { Component, computed, effect, inject } from '@angular/core';
 import { PermissionsHeader } from './components/permissions-header/permissions-header';
 import { PermissionsFilters } from './components/permissions-filters/permissions-filters';
 import { PermissionApiService } from '../../services/permission-api-service';
-import { Permission, PERMISSION_ACTIONS, PermissionAction } from '../../types/permission-types';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { PERMISSION_ACTIONS, PermissionAction } from '../../types/permission-types';
 import { Pagination } from '../../../../shared/components/pagination/pagination';
 import { PermissionsTable } from './components/permissions-table/permissions-table';
-import { Page } from '../../../../shared/types/pagination-types';
-import { createEmptyPage } from '../../../../shared/utils/pagination-util';
 import {
   arrayParam,
   injectQueryParams,
   intParam,
   stringParam,
 } from '../../../../shared/utils/inject-query-params';
+import { injectQuery } from '@tanstack/angular-query';
+import { firstValueFrom } from 'rxjs';
+import { createEmptyPage } from '../../../../shared/utils/pagination-util';
 
 const PAGE_SIZES = [10, 20, 50, 100];
 
@@ -37,16 +37,20 @@ export default class PermissionsPage {
 
   protected readonly filters = computed(() => this.queryParams.state());
 
-  private readonly resource = rxResource({
-    params: () => ({ filters: this.filters() }),
-    stream: ({ params }) => this.permissionApiService.getAll(params.filters),
+  protected readonly query = injectQuery(() => {
+    const filters = { ...this.filters() };
+    return {
+      queryKey: ['permissions', { ...filters }],
+      queryFn: () => firstValueFrom(this.permissionApiService.getAll(filters)),
+      placeholderData: (previousData) =>
+        previousData ?? createEmptyPage(filters.page, filters.size),
+      staleTime: 1000 * 60 * 5,
+    };
   });
 
-  protected readonly response = linkedSignal<Page<Permission> | undefined, Page<Permission>>({
-    source: () => this.resource.value(),
-    computation: (current, previous) =>
-      current ?? previous?.value ?? createEmptyPage(this.filters().page, this.filters().size),
-  });
+  constructor() {
+    effect(() => console.log(this.query.data()));
+  }
 
   protected onSearchTermChange(search: string) {
     this.queryParams.patch({ search });
@@ -65,7 +69,6 @@ export default class PermissionsPage {
   }
 
   protected onCurrentPageChange(page: number) {
-    console.log(page);
     this.queryParams.patch({ page });
   }
 

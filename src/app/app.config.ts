@@ -7,6 +7,8 @@ import { httpErrorInterceptor } from './core/interceptors/http-error-interceptor
 import { addAccessTokenInterceptor } from './core/interceptors/add-access-token-interceptor';
 import { refreshTokenInterceptor } from './core/interceptors/refresh-token-interceptor';
 import { provideSpartanHlm } from '@spartan-ng/helm/utils';
+import { provideTanStackQuery, QueryClient } from '@tanstack/angular-query';
+import { withDevtools } from '@tanstack/angular-query-devtools';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -21,5 +23,6 @@ export const appConfig: ApplicationConfig = {
       ]),
     ),
     provideSpartanHlm(),
+    provideTanStackQuery(() => new QueryClient(), withDevtools()),
   ],
 };

@@ -1,4 +1,4 @@
-import { Component, computed, inject, linkedSignal } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { RolesHeader } from './components/roles-header/roles-header';
 import { RolesFilters } from './components/roles-filters/roles-filters';
 import {
@@ -9,11 +9,10 @@ import {
 } from '../../../../shared/utils/inject-query-params';
 import { RolesTable } from './components/roles-table/roles-table';
 import { RoleApiService } from '../../services/role-api-service';
-import { rxResource } from '@angular/core/rxjs-interop';
-import { Page } from '../../../../shared/types/pagination-types';
-import { Role } from '../../types/role-types';
 import { createEmptyPage } from '../../../../shared/utils/pagination-util';
 import { Pagination } from '../../../../shared/components/pagination/pagination';
+import { injectQuery } from '@tanstack/angular-query';
+import { firstValueFrom } from 'rxjs';
 
 const PAGE_SIZES = [10, 20, 50, 100];
 
@@ -37,15 +36,15 @@ export default class RolesPage {
 
   protected readonly filters = computed(() => this.queryParams.state());
 
-  private readonly resource = rxResource({
-    params: () => ({ filters: this.filters() }),
-    stream: ({ params }) => this.roleApiService.getAll(params.filters),
-  });
-
-  protected readonly response = linkedSignal<Page<Role> | undefined, Page<Role>>({
-    source: () => this.resource.value(),
-    computation: (current, previous) =>
-      current ?? previous?.value ?? createEmptyPage(this.filters().page, this.filters().size),
+  protected readonly query = injectQuery(() => {
+    const filters = { ...this.filters() };
+    return {
+      queryKey: ['roles', filters],
+      queryFn: () => firstValueFrom(this.roleApiService.getAll(filters)),
+      placeholderData: (previousData) =>
+        previousData ?? createEmptyPage(filters.page, filters.size),
+      staleTime: 1000 * 60 * 5,
+    };
   });
 
   protected onSearchTermChange(search: string) {

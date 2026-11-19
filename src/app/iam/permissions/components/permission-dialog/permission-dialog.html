@@ -1,25 +1,10 @@
-@if (action() === 'delete') {
-  <hlm-dialog-header>
-    <h3 hlmDialogTitle>¿Estás seguro?</h3>
-    <p hlmDialogDescription>
-      Esta acción no se puede deshacer. Esto eliminara permanentemente el permiso.
-    </p>
-  </hlm-dialog-header>
-  <hlm-dialog-footer>
-    <button hlmBtn variant="outline" [disabled]="isRequesting()" hlmDialogClose>Cancelar</button>
-    <button hlmBtn variant="destructive" [disabled]="isRequesting()" (click)="deletePermission()">
-      Eliminar
-    </button>
-  </hlm-dialog-footer>
-} @else {
-  <hlm-dialog-header>
-    <h3 hlmDialogTitle>{{ action() === 'create' ? 'Crea un permiso' : 'Actualiza el permiso' }}</h3>
-    <p hlmDialogDescription>
-      {{
-        `${action() === 'create' ? 'Completa' : 'Edita'} los campos del formulario para registrar la información.`
-      }}
-    </p>
-  </hlm-dialog-header>
+<hlm-dialog-header>
+  <h3 hlmDialogTitle>{{ header().title }}</h3>
+  <p hlmDialogDescription>
+    {{ header().description }}
+  </p>
+</hlm-dialog-header>
+@if (action() !== 'delete') {
   <form [formRoot]="permissionForm" id="permissionForm">
     <hlm-field-group class="gap-4">
       <hlm-field>
@@ -61,22 +46,35 @@
       </hlm-field>
     </hlm-field-group>
   </form>
-  <hlm-dialog-footer>
+}
+<hlm-dialog-footer>
+  <button hlmBtn variant="outline" type="button" [disabled]="isBusy()" hlmDialogClose>
+    Cancelar
+  </button>
+  @if (action() === 'delete') {
     <button
       hlmBtn
-      variant="outline"
-      type="button"
-      [disabled]="permissionForm().submitting()"
-      hlmDialogClose
+      variant="destructive"
+      [disabled]="deleteMutation.isPending() || deleteMutation.isSuccess()"
+      (click)="deleteMutation.mutate()"
     >
-      Cancelar
+      @if (saveMutation.isPending() || saveMutation.isSuccess()) {
+        <hlm-spinner />
+      } @else {
+        Eliminar
+      }
     </button>
-    <button hlmBtn form="permissionForm" [disabled]="permissionForm().submitting()">
-      @if (permissionForm().submitting()) {
+  } @else {
+    <button
+      hlmBtn
+      form="permissionForm"
+      [disabled]="saveMutation.isPending() || saveMutation.isSuccess()"
+    >
+      @if (saveMutation.isPending() || saveMutation.isSuccess()) {
         <hlm-spinner />
       } @else {
         Guardar
       }
     </button>
-  </hlm-dialog-footer>
-}
+  }
+</hlm-dialog-footer>

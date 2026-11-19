@@ -16,12 +16,8 @@ import { HlmFieldImports } from '@spartan-ng/helm/field';
 import { HlmInputImports } from '@spartan-ng/helm/input';
 import { HlmComboboxImports } from '@spartan-ng/helm/combobox';
 import { HlmSpinnerImports } from '@spartan-ng/helm/spinner';
-import {
-  injectMutation,
-  injectQuery,
-  keepPreviousData,
-  QueryClient,
-} from '@tanstack/angular-query';
+import { injectMutation, injectQuery, QueryClient } from '@tanstack/angular-query';
+import { permissionKeys } from '../../utils/permission-util';
 
 interface PermissionDialogContext {
   action: 'create' | 'edit' | 'delete';
@@ -66,13 +62,12 @@ export class PermissionDialog {
     const id = this.permissionId();
     const action = this._action();
     return {
-      queryKey: ['permission', 'dialog', id],
+      queryKey: id ? permissionKeys.detail(id) : permissionKeys.details(),
       queryFn: () =>
         firstValueFrom(
           action === 'create' ? of(INITIAL_STATE) : this.permissionApiService.get(id!),
         ),
-      initialData: INITIAL_STATE,
-      placeholderData: keepPreviousData,
+      placeholderData: (previous) => previous ?? INITIAL_STATE,
     };
   });
 
@@ -87,7 +82,7 @@ export class PermissionDialog {
         ),
       onSuccess: () => {
         this.queryClient.invalidateQueries({
-          predicate: (query) => query.queryKey.includes('permissions'),
+          queryKey: permissionKeys.all,
         });
         this.dialogRef.close();
         toast.success(`Permiso ${action === 'create' ? 'creado' : 'actualizado'} correctamente`);
@@ -98,14 +93,14 @@ export class PermissionDialog {
     mutationFn: () => firstValueFrom(this.permissionApiService.delete(this.permissionId()!)),
     onSuccess: () => {
       this.queryClient.invalidateQueries({
-        predicate: (query) => query.queryKey.includes('permissions'),
+        queryKey: permissionKeys.all,
       });
       this.dialogRef.close();
       toast.success('Permiso eliminado correctamente');
     },
   }));
 
-  private readonly permissionModel = linkedSignal<PermissionData>(() => this.query.data());
+  private readonly permissionModel = linkedSignal<PermissionData>(() => this.query.data()!);
 
   protected readonly header = computed(() => {
     switch (this._action()) {

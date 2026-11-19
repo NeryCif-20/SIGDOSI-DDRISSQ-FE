@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { PermissionsHeader } from './components/permissions-header/permissions-header';
 import { PermissionsFilters } from './components/permissions-filters/permissions-filters';
 import { PermissionApiService } from '../../services/permission-api-service';
@@ -14,6 +14,7 @@ import {
 import { injectQuery } from '@tanstack/angular-query';
 import { firstValueFrom } from 'rxjs';
 import { createEmptyPage } from '../../../../shared/utils/pagination-util';
+import { permissionKeys } from '../../utils/permission-util';
 
 const PAGE_SIZES = [10, 20, 50, 100];
 
@@ -40,17 +41,13 @@ export default class PermissionsPage {
   protected readonly query = injectQuery(() => {
     const filters = { ...this.filters() };
     return {
-      queryKey: ['permissions', filters],
+      queryKey: permissionKeys.list(filters),
       queryFn: () => firstValueFrom(this.permissionApiService.getAll(filters)),
       placeholderData: (previousData) =>
         previousData ?? createEmptyPage(filters.page, filters.size),
       staleTime: 1000 * 60 * 5,
     };
   });
-
-  constructor() {
-    effect(() => console.log(this.query.data()));
-  }
 
   protected onSearchTermChange(search: string) {
     this.queryParams.patch({ search });

@@ -13,6 +13,7 @@ import { createEmptyPage } from '../../../../shared/utils/pagination-util';
 import { Pagination } from '../../../../shared/components/pagination/pagination';
 import { injectQuery } from '@tanstack/angular-query';
 import { firstValueFrom } from 'rxjs';
+import { roleKeys } from '../../utils/role-util';
 
 const PAGE_SIZES = [10, 20, 50, 100];
 
@@ -39,7 +40,7 @@ export default class RolesPage {
   protected readonly query = injectQuery(() => {
     const filters = { ...this.filters() };
     return {
-      queryKey: ['roles', filters],
+      queryKey: roleKeys.list(filters),
       queryFn: () => firstValueFrom(this.roleApiService.getAll(filters)),
       placeholderData: (previousData) =>
         previousData ?? createEmptyPage(filters.page, filters.size),

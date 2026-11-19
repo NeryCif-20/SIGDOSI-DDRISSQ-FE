@@ -4,6 +4,7 @@ import { environment } from '@envs/environment';
 import { Role, RoleData, RoleQueryParams } from '../types/role-types';
 import { toHttpQueryParams } from '../../../shared/utils/http-params-util';
 import { Page } from '../../../shared/types/pagination-types';
+import { toRole } from '../utils/role-util';
 
 const ROLES_API = `${environment.BASE_API}/v1/roles`;
 
@@ -17,15 +18,12 @@ export class RoleApiService {
   }
 
   public create(data: RoleData) {
-    return this.httpClient.post<Role>(ROLES_API, {
-      ...data,
-      description: data.description || null,
-    });
+    return this.httpClient.post<Role>(ROLES_API, toRole(data));
   }
 
   public update(id: string, data: Partial<RoleData>) {
     const url = `${ROLES_API}/${id}`;
-    return this.httpClient.patch<Role>(url, { ...data, description: data.description || null });
+    return this.httpClient.patch<Role>(url, toRole(data));
   }
 
   public delete(id: string) {

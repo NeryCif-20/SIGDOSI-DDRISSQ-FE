@@ -17,6 +17,7 @@ import { SearchInput } from '../../../../shared/components/search-input/search-i
 import { firstValueFrom } from 'rxjs';
 import { injectQuery, keepPreviousData } from '@tanstack/angular-query';
 import { groupBy } from '../../../../shared/utils/arrays-util';
+import { permissionKeys } from '../../utils/permission-util';
 
 type SelectionState = 'all' | 'some' | 'none';
 
@@ -49,7 +50,7 @@ export class PermissionSelector {
   private readonly query = injectQuery(() => {
     const search = this.searchTerm();
     return {
-      queryKey: ['permissions', 'selector', search],
+      queryKey: permissionKeys.list({ search }),
       queryFn: () => firstValueFrom(this.permissionApiService.getAll({ search })),
       placeholderData: keepPreviousData,
     };

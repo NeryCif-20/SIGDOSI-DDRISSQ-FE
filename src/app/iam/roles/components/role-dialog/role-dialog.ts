@@ -13,6 +13,7 @@ import { toast } from '@spartan-ng/brain/sonner';
 import { HlmTextarea } from '@spartan-ng/helm/textarea';
 import { PermissionSelector } from '../../../permissions/components/permission-selector/permission-selector';
 import { injectMutation, injectQuery, QueryClient } from '@tanstack/angular-query';
+import { roleKeys, toRoleData } from '../../utils/role-util';
 
 interface RoleDialogContext {
   action: 'create' | 'edit' | 'delete';
@@ -56,19 +57,14 @@ export class RoleDialog {
   private readonly query = injectQuery(() => {
     const id = this.roleId();
     return {
-      queryKey: ['role', 'dialog', id],
+      queryKey: id ? roleKeys.detail(id) : roleKeys.details(),
       queryFn: () =>
         firstValueFrom(
           this._action() === 'create'
             ? of(INITIAL_STATE)
-            : this.roleApiService.get(id!).pipe(
-                map((role) => {
-                  const description = role.description === undefined ? '' : role.description;
-                  const permissions = role.permissions.map((permission) => permission.id);
-                  return { ...role, description, permissions };
-                }),
-              ),
+            : this.roleApiService.get(id!).pipe(map((role) => toRoleData(role))),
         ),
+      placeholderData: (previousData) => previousData ?? INITIAL_STATE,
     };
   });
 

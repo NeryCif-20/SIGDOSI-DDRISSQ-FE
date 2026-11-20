@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { provideIcons } from '@ng-icons/core';
 import { lucideLoader } from '@ng-icons/lucide';
@@ -6,7 +6,8 @@ import { HlmEmptyImports } from '@spartan-ng/helm/empty';
 import { HlmToasterImports } from '@spartan-ng/helm/sonner';
 import { HlmSpinnerImports } from '@spartan-ng/helm/spinner';
 import { AuthService } from './iam/auth/services/auth-service';
-import { catchError, EMPTY, switchMap, timer } from 'rxjs';
+import { catchError, EMPTY, firstValueFrom, switchMap, timer } from 'rxjs';
+import { injectMutation } from '@tanstack/angular-query';
 
 @Component({
   imports: [RouterOutlet, HlmEmptyImports, HlmSpinnerImports, HlmToasterImports],
@@ -18,18 +19,17 @@ import { catchError, EMPTY, switchMap, timer } from 'rxjs';
 export class App implements OnInit {
   private readonly authService = inject(AuthService);
 
-  private readonly _isLoading = signal(false);
-  protected readonly isLoading = this._isLoading.asReadonly();
+  protected readonly refreshMutation = injectMutation(() => ({
+    mutationFn: () =>
+      firstValueFrom(
+        timer(500).pipe(
+          switchMap(() => this.authService.refresh()),
+          catchError(() => EMPTY),
+        ),
+      ),
+  }));
 
   ngOnInit(): void {
-    this._isLoading.set(true);
-    timer(500)
-      .pipe(
-        switchMap(() => this.authService.refresh()),
-        catchError(() => EMPTY),
-      )
-      .subscribe({
-        complete: () => this._isLoading.set(false),
-      });
+    this.refreshMutation.mutate();
   }
 }

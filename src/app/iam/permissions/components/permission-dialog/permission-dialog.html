@@ -30,7 +30,7 @@
         >
           <hlm-combobox-input
             placeholder="Crear, actualizar, ver..."
-            [showClear]="permissionForm.action().value() !== ''"
+            [showClear]="permissionForm.action().value()"
           />
           <hlm-combobox-content *hlmComboboxPortal>
             @for (option of options; track $index) {

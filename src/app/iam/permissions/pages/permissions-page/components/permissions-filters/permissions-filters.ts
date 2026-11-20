@@ -1,6 +1,4 @@
 import { Component, model, output } from '@angular/core';
-import { HlmInputImports } from '@spartan-ng/helm/input';
-import { HlmInputGroupImports } from '@spartan-ng/helm/input-group';
 import {
   PERMISSION_ACTION_LABELS,
   PERMISSION_ACTION_OPTIONS,
@@ -13,14 +11,7 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideFilterX } from '@ng-icons/lucide';
 
 @Component({
-  imports: [
-    HlmInputGroupImports,
-    HlmInputImports,
-    HlmComboboxImports,
-    HlmButtonImports,
-    NgIcon,
-    SearchInput,
-  ],
+  imports: [HlmComboboxImports, HlmButtonImports, NgIcon, SearchInput],
   selector: 'sigdosi-permissions-filters',
   styles: ``,
   templateUrl: './permissions-filters.html',

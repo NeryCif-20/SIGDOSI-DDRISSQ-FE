@@ -1,6 +1,6 @@
 import { Pageable } from '../../../shared/types/pagination-types';
 
-export const PERMISSION_ACTIONS = ['CREATE', 'READ', 'DELETE', 'UPDATE'];
+export const PERMISSION_ACTIONS = ['CREATE', 'READ', 'DELETE', 'UPDATE'] as const;
 
 export type PermissionAction = (typeof PERMISSION_ACTIONS)[number];
 
@@ -13,11 +13,13 @@ export const PERMISSION_ACTION_LABELS: Record<PermissionAction, string> = {
 
 export interface PermissionData {
   module: string;
-  action: PermissionAction;
+  action: null | PermissionAction;
 }
 
-export interface Permission extends PermissionData {
+export interface Permission {
   id: string;
+  module: string;
+  action: PermissionAction;
 }
 
 export interface PermissionQueryParams extends Pageable {

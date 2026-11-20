@@ -31,8 +31,8 @@ export class RoleApiService {
     return this.httpClient.delete<void>(url);
   }
 
-  public getAll(filters: RoleQueryParams) {
-    const params = toHttpQueryParams(filters);
+  public getAll(filters?: RoleQueryParams) {
+    const params = toHttpQueryParams(filters ?? {});
     return this.httpClient.get<Page<Role>>(ROLES_API, { params });
   }
 }

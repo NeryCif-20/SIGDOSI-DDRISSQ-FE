@@ -34,11 +34,8 @@ export class BreadcrumbService {
         url += `/${segment}`;
       }
       const label = route.snapshot.title;
-      if (label) {
-        items.push({
-          label,
-          url,
-        });
+      if (label && items.at(-1)?.url !== url) {
+        items.push({ label, url });
       }
       route = route.firstChild;
     }

@@ -1,0 +1,25 @@
+<hlm-combobox-multiple
+  class="w-full"
+  [(value)]="selectedRoles"
+  [itemToString]="getLabel"
+  autoHighlight
+>
+  <hlm-combobox-chips>
+    <ng-template hlmComboboxValues let-values>
+      @for (value of values; track value) {
+        <hlm-combobox-chip [value]="value">{{ getLabel(value) }}</hlm-combobox-chip>
+      }
+    </ng-template>
+    <input hlmComboboxChipInput placeholder="Buscar por nombre de rol..." />
+  </hlm-combobox-chips>
+  <hlm-combobox-content *hlmComboboxPortal>
+    <hlm-combobox-empty>No se encontraron roles</hlm-combobox-empty>
+    <div hlmComboboxList class="max-h-60 overflow-y-auto">
+      @for (role of roles(); track role.value) {
+        <hlm-combobox-item [value]="role.value">
+          {{ role.label }}
+        </hlm-combobox-item>
+      }
+    </div>
+  </hlm-combobox-content>
+</hlm-combobox-multiple>

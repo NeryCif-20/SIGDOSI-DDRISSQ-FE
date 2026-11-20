@@ -1,4 +1,4 @@
-@if (isLoading()) {
+@if (refreshMutation.isPending() || refreshMutation.isIdle()) {
   <div class="flex min-h-screen">
     <hlm-empty>
       <hlm-empty-header>

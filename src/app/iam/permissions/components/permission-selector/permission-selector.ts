@@ -15,9 +15,10 @@ import {
 import { HlmCheckboxImports } from '@spartan-ng/helm/checkbox';
 import { SearchInput } from '../../../../shared/components/search-input/search-input';
 import { firstValueFrom } from 'rxjs';
-import { injectQuery, keepPreviousData } from '@tanstack/angular-query';
+import { injectQuery } from '@tanstack/angular-query';
 import { groupBy } from '../../../../shared/utils/arrays-util';
 import { permissionKeys } from '../../utils/permission-util';
+import { normalize } from '../../../../shared/utils/strings-util';
 
 type SelectionState = 'all' | 'some' | 'none';
 
@@ -48,17 +49,20 @@ export class PermissionSelector {
   protected readonly searchTerm = signal('');
 
   private readonly query = injectQuery(() => {
-    const search = this.searchTerm();
     return {
-      queryKey: permissionKeys.list({ search }),
-      queryFn: () => firstValueFrom(this.permissionApiService.getAll({ search })),
-      placeholderData: keepPreviousData,
+      queryKey: permissionKeys.lists(),
+      queryFn: () => firstValueFrom(this.permissionApiService.getAll()),
     };
   });
 
-  private readonly permissions = computed(() =>
-    groupBy(this.query.data()?.content ?? [], (permission) => permission.module),
-  );
+  private readonly permissions = computed(() => {
+    const search = normalize(this.searchTerm());
+    const content = this.query.data()?.content ?? [];
+    const values = search
+      ? content.filter((permission) => normalize(permission.module).includes(search))
+      : content;
+    return groupBy(values, (permission) => permission.module);
+  });
 
   protected readonly groups = computed(() =>
     Object.entries(this.permissions()).map(([module, items]) => ({

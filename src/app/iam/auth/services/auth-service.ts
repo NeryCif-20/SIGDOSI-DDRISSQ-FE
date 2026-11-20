@@ -1,5 +1,5 @@
 import { computed, inject, Service, signal } from '@angular/core';
-import { User } from '../../users/user-types';
+import { User } from '../../users/types/user-types';
 import { AuthApiService } from './auth-api-service';
 import { AuthResponse, LoginData, SetupPasswordData } from '../types/auth-types';
 import { catchError, finalize, map, Observable, switchMap, throwError } from 'rxjs';
@@ -32,7 +32,7 @@ export class AuthService {
     return request$.pipe(
       switchMap(({ accessToken }) => {
         this.context.update((context) => ({ ...context, accessToken }));
-        return this.userApiService.getAuthenticatedUser();
+        return this.userApiService.getMe();
       }),
       map((user) =>
         this.context.update((context) => ({ ...context, status: 'AUTHENTICATED', user: user })),

@@ -10,7 +10,7 @@ export interface RoleData {
 export interface Role {
   id: string;
   name: string;
-  description?: string;
+  description: string | null;
   permissions: Permission[];
 }
 

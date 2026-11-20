@@ -1,0 +1,18 @@
+<sigdosi-users-header />
+<sigdosi-users-filters
+  [searchTerm]="filters().search"
+  [selectedStatuses]="filters().statuses"
+  [selectedRoles]="filters().roles"
+  (searchTermChange)="onSearchTermChange($event)"
+  (selectedStatusesChange)="onSelectedStatusesChange($event)"
+  (selectedRolesChange)="onSelectedRolesChange($event)"
+  (cleanFilters)="onCleanFilters()"
+/>
+<sigdosi-pagination
+  [pageSizes]="pageSizes"
+  [totalElements]="query.data()!.totalElements"
+  [currentPage]="filters().page"
+  [elementsPerPage]="filters().size"
+  (currentPageChange)="onCurrentPageChange($event)"
+  (elementsPerPageChange)="onElementsPerPageChange($event)"
+/>

@@ -11,7 +11,7 @@ export function toRoleData({ name, description, permissions }: Role): RoleData {
 export function toRole({ name, description, permissions }: Partial<RoleData>) {
   return {
     name,
-    description: description || undefined,
+    description: description || null,
     permissions,
   };
 }

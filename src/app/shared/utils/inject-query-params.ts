@@ -23,13 +23,18 @@ export function stringParam(defaultValue: string): Param<string> {
   };
 }
 
-export function arrayParam(allowedValues?: readonly string[]): Param<string[]> {
+export function arrayParam<const T extends readonly string[]>(
+  allowedValues?: T,
+): Param<T[number][]> {
   return {
     parse: (rawValues) => {
       const unique = [...new Set(rawValues)];
+
       return (
-        allowedValues ? unique.filter((value) => allowedValues.includes(value)) : unique
-      ).sort();
+        allowedValues
+          ? unique.filter((value) => allowedValues.includes(value as T[number]))
+          : unique
+      ).sort() as T[number][];
     },
     serialize: (values) => (values.length ? values : null),
   };

@@ -4,6 +4,7 @@ import { MainLayout } from './shared/layouts/main-layout/main-layout';
 export const routes: Routes = [
   {
     path: 'auth',
+    title: 'Auth',
     loadChildren: () => import('./iam/auth/auth.routes'),
   },
   {
@@ -19,6 +20,11 @@ export const routes: Routes = [
         path: 'roles',
         title: 'Roles',
         loadComponent: () => import('./iam/roles/pages/roles-page/roles-page'),
+      },
+      {
+        path: 'users',
+        title: 'Usuarios',
+        loadChildren: () => import('./iam/users/users.routes'),
       },
     ],
   },

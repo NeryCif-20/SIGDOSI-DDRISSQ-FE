@@ -8,7 +8,7 @@ import {
   PermissionData,
 } from '../../types/permission-types';
 import { firstValueFrom, of } from 'rxjs';
-import { form, maxLength, minLength, required, FormRoot, FormField } from '@angular/forms/signals';
+import { form, minLength, required, FormRoot, FormField } from '@angular/forms/signals';
 import { toast } from '@spartan-ng/brain/sonner';
 import { HlmDialogImports } from '@spartan-ng/helm/dialog';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
@@ -26,7 +26,7 @@ interface PermissionDialogContext {
 
 const INITIAL_STATE: PermissionData = {
   module: '',
-  action: '',
+  action: null,
 };
 
 @Component({
@@ -136,7 +136,6 @@ export class PermissionDialog {
     (path) => {
       required(path.module, { message: 'El módulo es obligatorio' });
       minLength(path.module, 1, { message: 'El módulo debe tener al menos un carácter' });
-      maxLength(path.action, 20, { message: 'El módulo no debe superar los 20 caracteres' });
       required(path.action, { message: 'La acción es obligatoria' });
     },
     {

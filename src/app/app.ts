@@ -7,7 +7,7 @@ import { HlmToasterImports } from '@spartan-ng/helm/sonner';
 import { HlmSpinnerImports } from '@spartan-ng/helm/spinner';
 import { AuthService } from './iam/auth/services/auth-service';
 import { injectMutation } from '@tanstack/angular-query';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, switchMap, timer } from 'rxjs';
 
 @Component({
   imports: [RouterOutlet, HlmEmptyImports, HlmSpinnerImports, HlmToasterImports],
@@ -21,7 +21,7 @@ export class App implements OnInit {
   private readonly router = inject(Router);
 
   private readonly refreshMutation = injectMutation(() => ({
-    mutationFn: () => firstValueFrom(this.authService.refresh()),
+    mutationFn: () => firstValueFrom(timer(500).pipe(switchMap(() => this.authService.refresh()))),
     onSettled: () => this.router.initialNavigation(),
   }));
 

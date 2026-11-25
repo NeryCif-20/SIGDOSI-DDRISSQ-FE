@@ -1,6 +1,6 @@
 import { inject, Service } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { filter, map, startWith } from 'rxjs';
 
 interface BreadcrumbItem {
@@ -11,7 +11,6 @@ interface BreadcrumbItem {
 @Service({ autoProvided: false })
 export class BreadcrumbService {
   private readonly router = inject(Router);
-  private readonly activatedRoute = inject(ActivatedRoute);
 
   public readonly items = toSignal(
     this.router.events.pipe(
@@ -26,14 +25,14 @@ export class BreadcrumbService {
 
   private buildItems(): BreadcrumbItem[] {
     const items: BreadcrumbItem[] = [];
-    let route = this.activatedRoute.root.firstChild;
+    let route = this.router.routerState.snapshot.root.firstChild;
     let url = '';
     while (route) {
-      const segment = route.snapshot.url.map((part) => part.path).join('/');
+      const segment = route.url.map((part) => part.path).join('/');
       if (segment) {
         url += `/${segment}`;
       }
-      const label = route.snapshot.title;
+      const label = route.title;
       if (label && items.at(-1)?.url !== url) {
         items.push({ label, url });
       }

@@ -4,6 +4,7 @@ import { AuthApiService } from './auth-api-service';
 import { AuthResponse, LoginData, SetupPasswordData } from '../types/auth-types';
 import { catchError, finalize, map, Observable, switchMap, throwError } from 'rxjs';
 import { UserApiService } from '../../users/services/user-api-service';
+import { injectMutation } from '@tanstack/angular-query';
 
 type AuthStatus = 'CHECKING' | 'AUTHENTICATED' | 'NOT_AUTHENTICATED';
 
@@ -28,15 +29,18 @@ export class AuthService {
   public readonly accessToken = computed(() => this.context().accessToken);
   public readonly user = computed(() => this.context().user);
 
+  private readonly auth = injectMutation(() => ({}));
+
   private authenticate(request$: Observable<AuthResponse>) {
     return request$.pipe(
       switchMap(({ accessToken }) => {
         this.context.update((context) => ({ ...context, accessToken }));
         return this.userApiService.getMe();
       }),
-      map((user) =>
-        this.context.update((context) => ({ ...context, status: 'AUTHENTICATED', user: user })),
-      ),
+      map((user) => {
+        this.context.update((context) => ({ ...context, status: 'AUTHENTICATED', user: user }));
+        return true;
+      }),
       catchError((error) => this.logout().pipe(switchMap(() => throwError(() => error)))),
     );
   }

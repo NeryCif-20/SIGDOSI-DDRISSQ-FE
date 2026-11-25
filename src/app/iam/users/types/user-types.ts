@@ -1,13 +1,13 @@
 import { Pageable } from '../../../shared/types/pagination-types';
 import { Role } from '../../roles/types/role-types';
 
-export const USER_STATUSES = ['ACTIVE', 'INACTIVE', 'PENDING'] as const;
+export const USER_STATUSES = ['ACTIVE', 'DISABLED', 'PENDING'] as const;
 
 export type UserStatus = (typeof USER_STATUSES)[number];
 
 export const USER_STATUS_LABELS: Record<UserStatus, string> = {
   ACTIVE: 'Activo',
-  INACTIVE: 'Inactivo',
+  DISABLED: 'Desactivado',
   PENDING: 'Pendiente',
 };
 
@@ -42,3 +42,16 @@ export interface UserStatusOption {
 export const USER_STATUS_OPTIONS: UserStatusOption[] = (
   Object.entries(USER_STATUS_LABELS) as [UserStatus, string][]
 ).map(([value, label]) => ({ value, label }));
+
+export const USER_SORT_VALUES = [
+  'email,asc',
+  'email,desc',
+  'cui,asc',
+  'cui,desc',
+  'name,asc',
+  'name,desc',
+  'phoneNumber,asc',
+  'phoneNumber,desc',
+] as const;
+
+export type UserSortValue = (typeof USER_SORT_VALUES)[number];

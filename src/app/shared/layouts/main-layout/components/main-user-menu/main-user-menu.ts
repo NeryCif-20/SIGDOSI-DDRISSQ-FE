@@ -1,22 +1,24 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideChevronDown, lucideCircleUser, lucideLogOut } from '@ng-icons/lucide';
-import { InitialsPipe } from '@spartan-ng/brain/avatar';
 import { HlmAvatarImports } from '@spartan-ng/helm/avatar';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmDropdownMenuImports } from '@spartan-ng/helm/dropdown-menu';
 import { toast } from '@spartan-ng/brain/sonner';
 import { AuthService } from '../../../../../iam/auth/services/auth-service';
+import { UserAvatar } from '../../../../../iam/users/components/user-avatar/user-avatar';
+import { injectMutation } from '@tanstack/angular-query';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   imports: [
     HlmButtonImports,
     HlmDropdownMenuImports,
     HlmAvatarImports,
-    InitialsPipe,
     HlmBadgeImports,
     NgIcon,
+    UserAvatar,
   ],
   selector: 'sigdosi-main-user-menu',
   styles: ``,
@@ -26,12 +28,13 @@ import { AuthService } from '../../../../../iam/auth/services/auth-service';
 export class MainUserMenu {
   private readonly authService = inject(AuthService);
 
-  protected handleLogout() {
-    this.authService.logout().subscribe({
-      complete: () =>
-        toast.success(this.authService.user()!.firstName, {
-          description: 'Hasta pronto!!!',
-        }),
-    });
-  }
+  protected readonly user = computed(() => this.authService.user());
+
+  protected readonly logoutMutation = injectMutation(() => ({
+    mutationFn: () => firstValueFrom(this.authService.logout()),
+    onSettled: () =>
+      toast.success(this.authService.user()!.firstName, {
+        description: 'Hasta pronto!!!',
+      }),
+  }));
 }

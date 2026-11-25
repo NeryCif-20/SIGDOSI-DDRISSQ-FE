@@ -12,6 +12,7 @@ import { toast } from '@spartan-ng/brain/sonner';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../../../services/auth-service';
 import { SetupPasswordStore } from '../../store/setup-password-store';
+import { injectMutation } from '@tanstack/angular-query';
 
 @Component({
   imports: [
@@ -37,6 +38,19 @@ export class PasswordForm {
     confirmNewPassword: '',
   }));
 
+  private readonly setupPasswordMutation = injectMutation(() => ({
+    mutationFn: (data: SetupPasswordData) => firstValueFrom(this.authService.setupPassword(data)),
+    onSuccess: async () => {
+      const navigationResult = await this.router.navigateByUrl('/', { replaceUrl: true });
+      if (navigationResult) {
+        toast.success(this.authService.user()!.firstName, {
+          description: 'Bienvenido!!!',
+        });
+      }
+    },
+    onError: () => this.setupPasswordStore.markTokenAsInvalid(),
+  }));
+
   protected readonly setupPasswordForm = form(
     this.setupPasswordModel,
     (path) => {
@@ -50,19 +64,7 @@ export class PasswordForm {
     },
     {
       submission: {
-        action: async (form) => {
-          try {
-            await firstValueFrom(this.authService.setupPassword(form().value()));
-            const result = await this.router.navigateByUrl('/', { replaceUrl: true });
-            if (result) {
-              toast.success(this.authService.user()!.firstName, {
-                description: 'Bienvenido!!!',
-              });
-            }
-          } catch {
-            this.setupPasswordStore.markTokenAsInvalid();
-          }
-        },
+        action: async (form) => this.setupPasswordMutation.mutate(form().value()),
       },
     },
   );

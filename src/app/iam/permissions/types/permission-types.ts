@@ -22,6 +22,11 @@ export interface Permission {
   action: PermissionAction;
 }
 
+export interface PermissionGroup {
+  module: string;
+  permissions: Permission[];
+}
+
 export interface PermissionQueryParams extends Pageable {
   search?: string;
   actions?: PermissionAction[];
@@ -38,3 +43,7 @@ export const PERMISSION_ACTION_OPTIONS: PermissionActionOption[] = (
   value,
   label,
 }));
+
+export const PERMISSION_SORT_VALUES = ['module,asc', 'module,desc'] as const;
+
+export type PermissionSortValue = (typeof PERMISSION_SORT_VALUES)[number];

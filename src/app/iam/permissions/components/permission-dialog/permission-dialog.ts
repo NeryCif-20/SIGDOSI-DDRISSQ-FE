@@ -17,7 +17,7 @@ import { HlmInputImports } from '@spartan-ng/helm/input';
 import { HlmComboboxImports } from '@spartan-ng/helm/combobox';
 import { HlmSpinnerImports } from '@spartan-ng/helm/spinner';
 import { injectMutation, injectQuery, QueryClient } from '@tanstack/angular-query';
-import { permissionKeys } from '../../utils/permission-util';
+import { permissionKeys } from '../../queries/permission-keys';
 
 interface PermissionDialogContext {
   action: 'create' | 'edit' | 'delete';

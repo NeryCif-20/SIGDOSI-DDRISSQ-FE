@@ -1,4 +1,4 @@
-<hlm-dialog (closed)="searchTerm.set('')">
+<hlm-dialog>
   <button
     hlmDialogTrigger
     [variant]="readonly() ? 'ghost' : 'default'"
@@ -18,49 +18,47 @@
   >
     <hlm-dialog-header>
       <h2 hlmDialogTitle>Permisos</h2>
-      @if (!readonly()) {
-        <p hlmDialogDescription>Marca los permisos que necesitas.</p>
-      }
+      <p hlmDialogDescription>{{ description() }}</p>
     </hlm-dialog-header>
     <sigdosi-search-input [(value)]="searchTerm" placeholder="Buscar por modulo..." />
-    <fieldset hlmFieldSet class="grid max-h-[60vh] grid-cols-1 overflow-y-auto sm:grid-cols-2">
-      @for (group of groups(); track group.module) {
-        <hlm-field-group class="gap-0 overflow-hidden rounded-lg border">
-          <hlm-field orientation="horizontal" class="bg-muted/50 border-b p-4">
+    <div class="grid max-h-[60vh] grid-cols-1 gap-4 overflow-y-auto sm:grid-cols-2">
+      @for (group of filteredGroups(); track group.module) {
+        @let state = deriveState(group);
+        <div class="overflow-hidden rounded-lg border">
+          <div class="bg-muted/50 flex items-center gap-2 border-b p-4">
             <hlm-checkbox
-              [disabled]="readonly()"
               [inputId]="group.module"
-              [checked]="group.state === 'all'"
-              [indeterminate]="group.state === 'some'"
-              (checkedChange)="toggleModule(group.items, $event)"
+              [checked]="state === 'all'"
+              [indeterminate]="state === 'some'"
+              [disabled]="readonly()"
+              (checkedChange)="toggleGroup(group)"
             />
-            <label hlmFieldLabel [for]="group.module" class="truncate">{{ group.module }}</label>
-          </hlm-field>
-          <div class="flex flex-col gap-2 p-4 pl-11">
-            @for (permission of group.items; track permission.id) {
-              <hlm-field orientation="horizontal">
+            <label [for]="group.module" class="font-bold">{{ group.module | titlecase }}</label>
+          </div>
+          <div class="flex flex-col gap-2 py-4 pl-10">
+            @for (permission of group.permissions; track permission.id) {
+              @let id = permission.id;
+              <div class="flex items-center gap-2">
                 <hlm-checkbox
+                  [inputId]="id"
+                  [checked]="selectedSet().has(id)"
                   [disabled]="readonly()"
-                  [inputId]="permission.id"
-                  [checked]="isSelected(permission.id)"
-                  (checkedChange)="toggle(permission.id, $event)"
+                  (checkedChange)="toggle(id)"
                 />
-                <label hlmFieldLabel [for]="permission.id">{{
-                  getActionLabel(permission.action)
-                }}</label>
-              </hlm-field>
+                <label hlmLabel [for]="id">{{ resolveActionLabel(permission.action) }}</label>
+              </div>
+            } @empty {
+              <div
+                class="text-muted-foreground col-span-full flex flex-col items-center gap-2 py-8 text-center"
+              >
+                <ng-icon name="lucideSearchX" class="text-3xl" />
+                <p>Sin resultados</p>
+              </div>
             }
           </div>
-        </hlm-field-group>
-      } @empty {
-        <div
-          class="text-muted-foreground col-span-full flex flex-col items-center gap-2 py-8 text-center"
-        >
-          <ng-icon name="lucideSearchX" class="text-3xl" />
-          <p>Sin resultados.</p>
         </div>
       }
-    </fieldset>
+    </div>
     <hlm-dialog-footer>
       <button hlmBtn hlmDialogClose>{{ closeButtonText() }}</button>
     </hlm-dialog-footer>

@@ -8,6 +8,7 @@
   (selectedRolesChange)="onSelectedRolesChange($event)"
   (cleanFilters)="onCleanFilters()"
 />
+<sigdosi-users-table [data]="query.data()!.content" [sortValues]="filters().sort" />
 <sigdosi-pagination
   [pageSizes]="pageSizes"
   [totalElements]="query.data()!.totalElements"

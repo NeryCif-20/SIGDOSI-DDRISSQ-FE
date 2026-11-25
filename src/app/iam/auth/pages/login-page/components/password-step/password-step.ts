@@ -11,6 +11,7 @@ import { LoginData } from '../../../../types/auth-types';
 import { Router } from '@angular/router';
 import { toast } from '@spartan-ng/brain/sonner';
 import { LoginStore } from '../../store/login-store';
+import { injectMutation } from '@tanstack/angular-query';
 
 @Component({
   imports: [
@@ -36,6 +37,21 @@ export class PasswordStep {
     password: '',
   });
 
+  private readonly loginMutation = injectMutation(() => ({
+    mutationFn: (data: LoginData) => firstValueFrom(this.authService.login(data)),
+    onSuccess: async () => {
+      const navigationResult = await this.router.navigateByUrl('/', {
+        replaceUrl: true,
+      });
+      if (navigationResult) {
+        toast.success(this.authService.user()!.firstName, {
+          description: 'Bienvenido!!! ',
+        });
+      }
+    },
+    onError: () => undefined,
+  }));
+
   protected readonly isRequesting = this._isRequesting.asReadonly();
   protected readonly loginForm = form(
     this.loginModel,
@@ -44,21 +60,7 @@ export class PasswordStep {
     },
     {
       submission: {
-        action: async (form) => {
-          try {
-            await firstValueFrom(this.authService.login(form().value()));
-            const result = await this.router.navigateByUrl('/', {
-              replaceUrl: true,
-            });
-            if (result) {
-              toast.success(this.authService.user()!.firstName, {
-                description: 'Bienvenido!!! ',
-              });
-            }
-          } catch {
-            return;
-          }
-        },
+        action: async (form) => this.loginMutation.mutate(form().value()),
       },
     },
   );

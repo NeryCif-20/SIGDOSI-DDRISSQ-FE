@@ -8,6 +8,7 @@ import { firstValueFrom } from 'rxjs';
 import { IdentifyData } from '../../../../types/auth-types';
 import { LoginStore } from '../../store/login-store';
 import { Autofocus } from '../../../../../../shared/directives/autofocus';
+import { injectMutation } from '@tanstack/angular-query';
 
 @Component({
   imports: [
@@ -30,6 +31,11 @@ export class IdentifyStep {
     email: '',
   });
 
+  private readonly identifyMutation = injectMutation(() => ({
+    mutationFn: (data: IdentifyData) => firstValueFrom(this.loginStore.identify(data)),
+    onError: () => undefined,
+  }));
+
   protected readonly identifyForm = form(
     this.identifyModel,
     (path) => {
@@ -38,13 +44,7 @@ export class IdentifyStep {
     },
     {
       submission: {
-        action: async (form) => {
-          try {
-            await firstValueFrom(this.loginStore.identify(form().value()));
-          } catch {
-            return;
-          }
-        },
+        action: async (form) => this.identifyMutation.mutate(form().value()),
       },
     },
   );

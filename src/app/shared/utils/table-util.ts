@@ -2,6 +2,7 @@ import { WritableSignal } from '@angular/core';
 import {
   columnSizingFeature,
   createTableHook,
+  functionalUpdate,
   rowSortingFeature,
   SortingState,
   tableFeatures,
@@ -17,25 +18,14 @@ export const { injectAppTable, createAppColumnHelper } = createTableHook({
   features,
 });
 
-export function createSignalUpdater<T>(state: WritableSignal<T>) {
-  return (updater: Updater<T>) => {
-    state.update((current) =>
-      typeof updater === 'function' ? (updater as (old: T) => T)(current) : updater,
-    );
-  };
-}
-
-export function mapSortingStateToStringArray(sorting: SortingState) {
+export function mapSortingStateToArrayString(sorting: SortingState) {
   return sorting.map((value) => `${value.id},${value.desc ? 'desc' : 'asc'}`);
 }
 
-export function mapArrayStringToSortingState(
-  queryParams: string[],
-  sortColumns: string[],
-): SortingState {
+export function mapArrayStringToSortingState(queryParams: string[]): SortingState {
   return queryParams.flatMap((value) => {
     const [id, direction] = value.split(',');
-    if (!sortColumns.includes(id) || !['asc', 'desc'].includes(direction)) {
+    if (!['asc', 'desc'].includes(direction)) {
       return [];
     }
     return [
@@ -45,4 +35,15 @@ export function mapArrayStringToSortingState(
       },
     ];
   });
+}
+
+export function createSortingChangeHandler(
+  sorting: WritableSignal<SortingState>,
+  sortValuesChange: WritableSignal<string[]>,
+) {
+  return (updater: Updater<SortingState>) => {
+    const next = functionalUpdate(updater, sorting());
+    sorting.set(next);
+    sortValuesChange.set(mapSortingStateToArrayString(next));
+  };
 }

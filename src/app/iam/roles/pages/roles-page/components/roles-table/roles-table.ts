@@ -1,13 +1,19 @@
-import { Component, effect, input, linkedSignal, output } from '@angular/core';
+import { Component, computed, input, model } from '@angular/core';
 import {
   createAppColumnHelper,
-  createSignalUpdater,
   injectAppTable,
   mapArrayStringToSortingState,
-  mapSortingStateToStringArray,
+  mapSortingStateToArrayString,
 } from '../../../../../../shared/utils/table-util';
-import { Role } from '../../../../types/role-types';
-import { FlexRender, flexRenderComponent, TanStackTableHeader } from '@tanstack/angular-table';
+import { Role, RoleSortValue } from '../../../../types/role-types';
+import {
+  FlexRender,
+  flexRenderComponent,
+  functionalUpdate,
+  SortingState,
+  TanStackTableHeader,
+  Updater,
+} from '@tanstack/angular-table';
 import { IdBadge } from '../../../../../../shared/components/id-badge/id-badge';
 import { PermissionSelector } from '../../../../../permissions/components/permission-selector/permission-selector';
 import { TableSortIndicator } from '../../../../../../shared/components/table-sort-indicator/table-sort-indicator';
@@ -27,8 +33,6 @@ const columns = columnHelper.columns([
         },
       }),
     size: 250,
-    minSize: 250,
-    maxSize: 250,
   }),
   columnHelper.accessor('name', {
     header: () => 'Nombre',
@@ -41,7 +45,7 @@ const columns = columnHelper.columns([
       flexRenderComponent(PermissionSelector, {
         inputs: {
           readonly: true,
-          selected: info.getValue().map((permission) => permission.id),
+          selectedIds: info.getValue().map((permission) => permission.id),
           closeButtonText: 'Cerrar',
         },
       }),
@@ -57,9 +61,7 @@ const columns = columnHelper.columns([
           id: info.row.original.id,
         },
       }),
-    size: 100,
-    minSize: 100,
-    maxSize: 100,
+    size: 150,
   }),
 ]);
 
@@ -71,15 +73,9 @@ const columns = columnHelper.columns([
 })
 export class RolesTable {
   public readonly data = input.required<Role[]>();
-  public readonly sortValues = input.required<string[]>();
+  public readonly sortValues = model.required<RoleSortValue[]>();
 
-  public readonly sortValuesChange = output<string[]>();
-
-  private readonly sorting = linkedSignal(() =>
-    mapArrayStringToSortingState(this.sortValues(), ['name']),
-  );
-
-  private readonly sortingChange = createSignalUpdater(this.sorting);
+  private readonly sorting = computed(() => mapArrayStringToSortingState(this.sortValues()));
 
   protected readonly table = injectAppTable(() => ({
     columns,
@@ -89,13 +85,11 @@ export class RolesTable {
     state: {
       sorting: this.sorting(),
     },
-    onSortingChange: this.sortingChange,
+    onSortingChange: this.onSortingChange,
   }));
 
-  constructor() {
-    effect(() => {
-      const sort = mapSortingStateToStringArray(this.sorting());
-      this.sortValuesChange.emit(sort);
-    });
+  private onSortingChange(updater: Updater<SortingState>) {
+    const next = functionalUpdate(updater, this.sorting());
+    this.sortValues.set(mapSortingStateToArrayString(next) as RoleSortValue[]);
   }
 }

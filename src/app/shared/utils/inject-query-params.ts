@@ -1,50 +1,20 @@
-import { computed, inject } from '@angular/core';
+import { computed, effect, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
+import { areEqual, toArray } from './arrays-util';
+import { Param } from './query-param-codecs';
 
-interface Param<T> {
-  parse(raw: string[]): T;
-  serialize(value: T): string | string[] | null;
-}
-
-export function intParam(defaultValue: number, min = 1, max = Infinity): Param<number> {
-  return {
-    parse: ([raw]) => {
-      return raw != null && /^\d+$/.test(raw) ? Math.min(Math.max(+raw, min), max) : defaultValue;
-    },
-    serialize: (value) => (value === defaultValue ? null : String(value)),
-  };
-}
-
-export function stringParam(defaultValue: string): Param<string> {
-  return {
-    parse: ([raw]) => raw ?? defaultValue,
-    serialize: (value) => (value === defaultValue || value === '' ? null : value),
-  };
-}
-
-export function arrayParam<const T extends readonly string[]>(
-  allowedValues?: T,
-): Param<T[number][]> {
-  return {
-    parse: (rawValues) => {
-      const unique = [...new Set(rawValues)];
-
-      return (
-        allowedValues
-          ? unique.filter((value) => allowedValues.includes(value as T[number]))
-          : unique
-      ).sort() as T[number][];
-    },
-    serialize: (values) => (values.length ? values : null),
-  };
-}
-
-export function injectQueryParams<S extends Record<string, unknown>>(schema: {
-  [K in keyof S]: Param<S[K]>;
-}) {
-  const activatedRoute = inject(ActivatedRoute);
+export function injectQueryParams<S extends Record<string, unknown>>(
+  schema: {
+    [K in keyof S]: Param<S[K]>;
+  },
+  options: { normalize: boolean; removeUnknown: boolean } = {
+    normalize: true,
+    removeUnknown: false,
+  },
+) {
   const router = inject(Router);
+  const activatedRoute = router.routerState.root;
   const queryParams = toSignal(activatedRoute.queryParamMap, {
     requireSync: true,
   });
@@ -56,18 +26,47 @@ export function injectQueryParams<S extends Record<string, unknown>>(schema: {
     }
     return out;
   });
-  const patch = (values: Partial<S>, options?: { replaceUrl?: boolean }) => {
-    const params: Record<string, unknown> = {};
-    for (const key in values) {
-      params[key] = schema[key].serialize(values[key] as S[typeof key]);
-    }
-    return router.navigate([], {
+  const navigate = (params: Record<string, unknown>, replaceUrl = true) =>
+    router.navigate([], {
       relativeTo: activatedRoute,
       queryParams: params,
       queryParamsHandling: 'merge',
-      replaceUrl: options?.replaceUrl ?? true,
+      replaceUrl,
     });
+  const patch = (values: Partial<S>, options?: { replaceUrl?: boolean }) => {
+    const params: Record<string, unknown> = {};
+    for (const key in values) {
+      if (values[key] === undefined) {
+        continue;
+      }
+      params[key] = schema[key].serialize(values[key] as S[typeof key]);
+    }
+    return navigate(params, options?.replaceUrl);
   };
+  effect(() => {
+    if (!options.normalize) {
+      return;
+    }
+    const params = queryParams();
+    const parsed = state();
+    const out: Record<string, unknown> = {};
+    for (const key in schema) {
+      const serialized = schema[key].serialize(parsed[key]);
+      if (!areEqual(params.getAll(key), toArray(serialized))) {
+        out[key] = serialized;
+      }
+    }
+    if (options.removeUnknown) {
+      for (const key of params.keys) {
+        if (!(key in schema)) {
+          out[key] = null;
+        }
+      }
+    }
+    if (Object.keys(out).length) {
+      navigate(out);
+    }
+  });
   return {
     state,
     patch,

@@ -1,19 +1,28 @@
-import { Component, effect, input, linkedSignal, output } from '@angular/core';
+import { Component, computed, input, model } from '@angular/core';
 import { HlmTableImports } from '@spartan-ng/helm/table';
-import { FlexRender, flexRenderComponent, TanStackTableHeader } from '@tanstack/angular-table';
-import { Permission } from '../../../../types/permission-types';
+import {
+  FlexRender,
+  flexRenderComponent,
+  functionalUpdate,
+  SortingState,
+  TanStackTableHeader,
+  Updater,
+} from '@tanstack/angular-table';
+import { Permission, PermissionSortValue } from '../../../../types/permission-types';
 import { TableSortIndicator } from '../../../../../../shared/components/table-sort-indicator/table-sort-indicator';
 
 import {
   createAppColumnHelper,
-  createSignalUpdater,
   injectAppTable,
   mapArrayStringToSortingState,
-  mapSortingStateToStringArray,
+  mapSortingStateToArrayString,
 } from '../../../../../../shared/utils/table-util';
 import { PermissionsActionCell } from '../permissions-action-cell/permissions-action-cell';
 import { PermissionsOptionsCell } from '../permissions-options-cell/permissions-options-cell';
 import { IdBadge } from '../../../../../../shared/components/id-badge/id-badge';
+import { TitleCasePipe } from '@angular/common';
+
+const titlecase = new TitleCasePipe();
 
 const columnHelper = createAppColumnHelper<Permission>();
 
@@ -28,12 +37,11 @@ const columns = columnHelper.columns([
         },
       }),
     size: 250,
-    minSize: 250,
-    maxSize: 250,
   }),
   columnHelper.accessor('module', {
     header: () => 'Módulo',
-    size: 220,
+    cell: (info) => titlecase.transform(info.getValue()),
+    size: 250,
   }),
   columnHelper.accessor('action', {
     header: 'Acción',
@@ -44,7 +52,7 @@ const columns = columnHelper.columns([
         },
       }),
     enableSorting: false,
-    size: 180,
+    size: 200,
   }),
   columnHelper.display({
     id: 'actions',
@@ -56,9 +64,7 @@ const columns = columnHelper.columns([
         },
       }),
     enableSorting: false,
-    size: 100,
-    minSize: 100,
-    maxSize: 100,
+    size: 150,
   }),
 ]);
 
@@ -70,14 +76,9 @@ const columns = columnHelper.columns([
 })
 export class PermissionsTable {
   public readonly data = input.required<Permission[]>();
-  public readonly sortValues = input.required<string[]>();
+  public readonly sortValues = model.required<PermissionSortValue[]>();
 
-  public readonly sortValuesChange = output<string[]>();
-
-  private readonly sorting = linkedSignal(() =>
-    mapArrayStringToSortingState(this.sortValues(), ['module']),
-  );
-  private readonly sortingChange = createSignalUpdater(this.sorting);
+  private readonly sorting = computed(() => mapArrayStringToSortingState(this.sortValues()));
 
   protected readonly table = injectAppTable(() => ({
     columns,
@@ -87,13 +88,11 @@ export class PermissionsTable {
     state: {
       sorting: this.sorting(),
     },
-    onSortingChange: this.sortingChange,
+    onSortingChange: this.onSortingChange,
   }));
 
-  constructor() {
-    effect(() => {
-      const sort = mapSortingStateToStringArray(this.sorting());
-      this.sortValuesChange.emit(sort);
-    });
+  private onSortingChange(updater: Updater<SortingState>) {
+    const next = functionalUpdate(updater, this.sorting());
+    this.sortValues.set(mapSortingStateToArrayString(next) as PermissionSortValue[]);
   }
 }

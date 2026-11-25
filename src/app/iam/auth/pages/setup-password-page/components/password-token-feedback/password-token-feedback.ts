@@ -1,12 +1,13 @@
 import { Component, computed, inject, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { switchMap, timer } from 'rxjs';
+import { firstValueFrom, switchMap, timer } from 'rxjs';
 import { AuthService } from '../../../../services/auth-service';
 import { HlmEmptyImports } from '@spartan-ng/helm/empty';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideShieldEllipsis, lucideShieldX } from '@ng-icons/lucide';
 import { SetupPasswordStore } from '../../store/setup-password-store';
+import { injectMutation } from '@tanstack/angular-query';
 
 interface PasswordTokenStatusFeedback {
   icon: string;
@@ -40,11 +41,15 @@ export class PasswordTokenFeedback implements OnInit {
     };
   });
 
+  private readonly validatePasswordTokenMutation = injectMutation(() => ({
+    mutationFn: () =>
+      firstValueFrom(
+        timer(1000).pipe(switchMap(() => this.setupPasswordStore.validatePasswordToken())),
+      ),
+    onError: () => undefined,
+  }));
+
   ngOnInit(): void {
-    timer(1000)
-      .pipe(switchMap(() => this.setupPasswordStore.validatePasswordToken()))
-      .subscribe({
-        error: () => undefined,
-      });
+    this.validatePasswordTokenMutation.mutate();
   }
 }

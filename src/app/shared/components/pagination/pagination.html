@@ -1,7 +1,7 @@
 <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
   <div class="flex items-center gap-3">
     <span hlmMuted class="whitespace-nowrap">Elementos por pagina:</span>
-    <hlm-select [value]="elementsPerPage()" (valueChange)="elementsPerPageChange.emit($event!)">
+    <hlm-select [value]="elementsPerPage()" (valueChange)="elementsPerPage.set($event!)">
       <hlm-select-trigger class="w-20">
         <hlm-select-value />
       </hlm-select-trigger>
@@ -14,58 +14,48 @@
       </hlm-select-content>
     </hlm-select>
   </div>
-  <nav hlmPagination>
-    <ul hlmPaginationContent>
-      @if (currentPage() > 1) {
-        <li hlmPaginationItem>
-          <a hlmPaginationLink link="." [queryParams]="{ page: 1 }" queryParamsHandling="merge">
-            <ng-icon name="lucideChevronsLeft" />
-          </a>
-        </li>
-        <li hlmPaginationItem>
-          <hlm-pagination-previous
-            iconOnly
-            link="."
-            [queryParams]="{ page: currentPage() - 1 }"
-            queryParamsHandling="merge"
-          />
-        </li>
-      }
-      @for (page of range(); track $index) {
-        <li hlmPaginationItem>
-          <a
-            hlmPaginationLink
-            [link]="currentPage() !== page ? '.' : undefined"
-            [queryParams]="{ page }"
-            queryParamsHandling="merge"
-            [isActive]="currentPage() === page"
-          >
-            {{ page }}
-          </a>
-        </li>
-      }
-      @if (currentPage() < pages()) {
-        <li hlmPaginationItem>
-          <hlm-pagination-next
-            iconOnly
-            link="."
-            [queryParams]="{ page: currentPage() + 1 }"
-            queryParamsHandling="merge"
-          />
-        </li>
-        <li hlmPaginationItem>
-          <a
-            hlmPaginationLink
-            link="."
-            [queryParams]="{ page: pages() }"
-            queryParamsHandling="merge"
-          >
-            <ng-icon name="lucideChevronsRight" />
-          </a>
-        </li>
-      }
-    </ul>
-  </nav>
+  <div class="flex items-center justify-center gap-2">
+    @if (currentPage() > 1) {
+      <button hlmBtn variant="outline" class="size-8" (click)="currentPageChange.emit(1)">
+        <span class="sr-only">Primer página</span>
+        <ng-icon name="lucideChevronsLeft" />
+      </button>
+      <button
+        hlmBtn
+        variant="outline"
+        class="size-8"
+        (click)="currentPageChange.emit(currentPage() - 1)"
+      >
+        <span class="sr-only">Ppágina anterior</span>
+        <ng-icon name="lucideChevronLeft" />
+      </button>
+    }
+    @for (page of range(); track $index) {
+      <button hlmBtn variant="outline" class="size-8" (click)="currentPageChange.emit(page)">
+        {{ page }}
+      </button>
+    }
+    @if (currentPage() < totalPages()) {
+      <button
+        hlmBtn
+        variant="outline"
+        class="size-8"
+        (click)="currentPageChange.emit(currentPage() - 1)"
+      >
+        <span class="sr-only">Página siguiente</span>
+        <ng-icon name="lucideChevronRight" />
+      </button>
+      <button
+        hlmBtn
+        variant="outline"
+        class="size-8"
+        (click)="currentPageChange.emit(totalPages())"
+      >
+        <span class="sr-only">Última página</span>
+        <ng-icon name="lucideChevronsRight" />
+      </button>
+    }
+  </div>
   <div class="flex items-center gap-2 py-2">
     <span class="text-sm font-semibold">
       {{ totalElements() }}
@@ -75,8 +65,8 @@
     >
     <hlm-separator orientation="vertical" class="border" />
     <span class="text-sm font-semibold">
-      {{ pages() }}
+      {{ totalPages() }}
     </span>
-    <span hlmMuted>{{ pages() !== 1 ? 'páginas' : 'página' }}</span>
+    <span hlmMuted>{{ totalPages() !== 1 ? 'páginas' : 'página' }}</span>
   </div>
 </div>

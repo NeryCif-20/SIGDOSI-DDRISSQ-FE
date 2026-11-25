@@ -5,10 +5,10 @@
   align="end"
   class="group rounded-full"
 >
-  <hlm-avatar>
-    <img hlmAvatarImage src="" alt="Avatar" />
-    <span hlmAvatarFallback>{{ 'Nickname' | initials }}</span>
-  </hlm-avatar>
+  <sigdosi-user-avatar
+    [avatar]="user()!.avatar"
+    [fallback]="`${user()!.firstName} ${user()!.lastName}`"
+  />
   <ng-icon
     name="lucideChevronDown"
     class="transition-transform duration-150 group-aria-expanded:rotate-180"
@@ -20,10 +20,11 @@
     <hlm-dropdown-menu-group>
       <hlm-dropdown-menu-label>
         <div class="flex flex-col items-center gap-1">
-          <hlm-avatar class="my-2 size-16">
-            <img hlmAvatarImage src="" alt="Avatar" />
-            <span hlmAvatarFallback>{{ 'Nickname' | initials }}</span>
-          </hlm-avatar>
+          <sigdosi-user-avatar
+            [avatar]="user()!.avatar"
+            [fallback]="`${user()!.firstName} ${user()!.lastName}`"
+            classes="my-2 size-16"
+          />
           <div class="flex flex-1 flex-col items-center gap-1">
             <span>Nickname</span>
             <span class="shimmer">{{ 'nickname@example.com' }}</span>
@@ -39,7 +40,12 @@
         Mi cuenta
       </button>
       <hlm-dropdown-menu-separator />
-      <button variant="destructive" hlmDropdownMenuItem class="gap-4" (click)="handleLogout()">
+      <button
+        variant="destructive"
+        hlmDropdownMenuItem
+        class="gap-4"
+        (click)="logoutMutation.mutate()"
+      >
         <ng-icon name="lucideLogOut" />
         Cerrar sesión
       </button>

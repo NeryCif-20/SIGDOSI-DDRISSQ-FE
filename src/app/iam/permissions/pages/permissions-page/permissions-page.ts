@@ -2,21 +2,24 @@ import { Component, computed, inject } from '@angular/core';
 import { PermissionsHeader } from './components/permissions-header/permissions-header';
 import { PermissionsFilters } from './components/permissions-filters/permissions-filters';
 import { PermissionApiService } from '../../services/permission-api-service';
-import { PERMISSION_ACTIONS, PermissionAction } from '../../types/permission-types';
+import {
+  PERMISSION_ACTIONS,
+  PERMISSION_SORT_VALUES,
+  PermissionAction,
+  PermissionSortValue,
+} from '../../types/permission-types';
 import { Pagination } from '../../../../shared/components/pagination/pagination';
 import { PermissionsTable } from './components/permissions-table/permissions-table';
-import {
-  arrayParam,
-  injectQueryParams,
-  intParam,
-  stringParam,
-} from '../../../../shared/utils/inject-query-params';
+import { injectQueryParams } from '../../../../shared/utils/inject-query-params';
 import { injectQuery } from '@tanstack/angular-query';
 import { firstValueFrom } from 'rxjs';
 import { createEmptyPage } from '../../../../shared/utils/pagination-util';
-import { permissionKeys } from '../../utils/permission-util';
+import { permissionKeys } from '../../queries/permission-keys';
+import { stringParam, arrayParam, intParam } from '../../../../shared/utils/query-param-codecs';
 
-const PAGE_SIZES = [10, 20, 50, 100];
+const PAGE_SIZES = [10, 20, 50, 100] as const;
+
+const DEFAULT_PAGE = 1;
 
 @Component({
   imports: [PermissionsHeader, PermissionsFilters, Pagination, PermissionsTable],
@@ -31,9 +34,9 @@ export default class PermissionsPage {
   private readonly queryParams = injectQueryParams({
     search: stringParam(''),
     actions: arrayParam(PERMISSION_ACTIONS),
-    sort: arrayParam(),
-    page: intParam(1),
-    size: intParam(this.pageSizes[0], this.pageSizes[0], this.pageSizes.at(-1)),
+    sort: arrayParam(PERMISSION_SORT_VALUES),
+    page: intParam(DEFAULT_PAGE, { min: 1 }),
+    size: intParam(this.pageSizes[0], { min: this.pageSizes[0], max: this.pageSizes.at(-1) }),
   });
 
   protected readonly filters = computed(() => this.queryParams.state());
@@ -49,27 +52,27 @@ export default class PermissionsPage {
     };
   });
 
-  protected onSearchTermChange(search: string) {
-    this.queryParams.patch({ search });
+  protected setSearch(search: string) {
+    this.queryParams.patch({ search, page: DEFAULT_PAGE });
   }
 
-  protected onSelectedActionsChange(actions: PermissionAction[]) {
-    this.queryParams.patch({ actions });
+  protected setActions(actions: PermissionAction[]) {
+    this.queryParams.patch({ actions, page: DEFAULT_PAGE });
   }
 
   protected onCleanFilters() {
-    this.queryParams.patch({ search: '', actions: [] });
+    this.queryParams.patch({ search: '', actions: [], page: DEFAULT_PAGE });
   }
 
-  protected onSortValuesChange(sort: string[]) {
+  protected setSort(sort: PermissionSortValue[]) {
     this.queryParams.patch({ sort });
   }
 
-  protected onCurrentPageChange(page: number) {
+  protected setPage(page: number) {
     this.queryParams.patch({ page });
   }
 
-  protected onElementsPerPageChange(size: number) {
+  protected setSize(size: number) {
     this.queryParams.patch({ size });
   }
 }

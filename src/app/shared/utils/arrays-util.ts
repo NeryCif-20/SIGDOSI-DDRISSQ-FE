@@ -1,10 +1,7 @@
-export function groupBy<T, K extends PropertyKey>(items: readonly T[], getKey: (item: T) => K) {
-  return items.reduce(
-    (groups, item) => {
-      const key = getKey(item);
-      (groups[key] ??= []).push(item);
-      return groups;
-    },
-    {} as Record<K, T[]>,
-  );
+export function toArray<T>(value?: T | T[] | null): T[] {
+  return value === null || value === undefined ? [] : Array.isArray(value) ? value : [value];
+}
+
+export function areEqual(array: unknown[], otherArray: unknown[]) {
+  return array.length === otherArray.length && array.every((value) => otherArray.includes(value));
 }

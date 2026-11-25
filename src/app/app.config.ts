@@ -1,5 +1,9 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { provideRouter, withComponentInputBinding } from '@angular/router';
+import {
+  provideRouter,
+  withComponentInputBinding,
+  withDisabledInitialNavigation,
+} from '@angular/router';
 import { routes } from './app.routes';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { addWithCredentialsInterceptor } from './core/interceptors/add-with-credentials-interceptor';
@@ -13,7 +17,7 @@ import { withDevtools } from '@tanstack/angular-query-devtools';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes, withComponentInputBinding()),
+    provideRouter(routes, withComponentInputBinding(), withDisabledInitialNavigation()),
     provideHttpClient(
       withInterceptors([
         addWithCredentialsInterceptor,

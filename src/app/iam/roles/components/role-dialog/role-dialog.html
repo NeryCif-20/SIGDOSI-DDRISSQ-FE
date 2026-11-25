@@ -29,7 +29,7 @@
     </hlm-field-group>
     <sigdosi-permission-selector
       [openButtonText]="`${action() === 'create' ? 'Agregar' : 'Modificar'} permisos...`"
-      (selectedChange)="onSelectedChange($event)"
+      (selectedIdsChange)="onSelectedIdsChange($event)"
     />
   </form>
 }

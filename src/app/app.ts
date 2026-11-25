@@ -1,13 +1,13 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, computed, inject, OnInit } from '@angular/core';
+import { Router, RouterOutlet } from '@angular/router';
 import { provideIcons } from '@ng-icons/core';
 import { lucideLoader } from '@ng-icons/lucide';
 import { HlmEmptyImports } from '@spartan-ng/helm/empty';
 import { HlmToasterImports } from '@spartan-ng/helm/sonner';
 import { HlmSpinnerImports } from '@spartan-ng/helm/spinner';
 import { AuthService } from './iam/auth/services/auth-service';
-import { catchError, EMPTY, firstValueFrom, switchMap, timer } from 'rxjs';
 import { injectMutation } from '@tanstack/angular-query';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   imports: [RouterOutlet, HlmEmptyImports, HlmSpinnerImports, HlmToasterImports],
@@ -18,16 +18,14 @@ import { injectMutation } from '@tanstack/angular-query';
 })
 export class App implements OnInit {
   private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
-  protected readonly refreshMutation = injectMutation(() => ({
-    mutationFn: () =>
-      firstValueFrom(
-        timer(500).pipe(
-          switchMap(() => this.authService.refresh()),
-          catchError(() => EMPTY),
-        ),
-      ),
+  private readonly refreshMutation = injectMutation(() => ({
+    mutationFn: () => firstValueFrom(this.authService.refresh()),
+    onSettled: () => this.router.initialNavigation(),
   }));
+
+  protected readonly isChecking = computed(() => this.authService.status() === 'CHECKING');
 
   ngOnInit(): void {
     this.refreshMutation.mutate();

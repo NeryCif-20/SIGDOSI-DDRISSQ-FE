@@ -30,8 +30,8 @@ export class PermissionApiService {
     return this.httpClient.delete<void>(url);
   }
 
-  public getAll(filters?: PermissionQueryParams) {
-    const params = toHttpQueryParams(filters ?? {});
+  public getAll(filters: PermissionQueryParams = {}) {
+    const params = toHttpQueryParams(filters);
     return this.httpClient.get<Page<Permission>>(PERMISSIONS_API, { params });
   }
 }

@@ -18,3 +18,7 @@ export interface RoleQueryParams extends Pageable {
   search?: string;
   permissions?: string[];
 }
+
+export const ROLE_SORT_VALUES = ['name,asc', 'name,desc'] as const;
+
+export type RoleSortValue = (typeof ROLE_SORT_VALUES)[number];

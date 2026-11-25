@@ -1,12 +1,7 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 import { RolesHeader } from './components/roles-header/roles-header';
 import { RolesFilters } from './components/roles-filters/roles-filters';
-import {
-  arrayParam,
-  injectQueryParams,
-  intParam,
-  stringParam,
-} from '../../../../shared/utils/inject-query-params';
+import { injectQueryParams } from '../../../../shared/utils/inject-query-params';
 import { RolesTable } from './components/roles-table/roles-table';
 import { RoleApiService } from '../../services/role-api-service';
 import { createEmptyPage } from '../../../../shared/utils/pagination-util';
@@ -14,8 +9,14 @@ import { Pagination } from '../../../../shared/components/pagination/pagination'
 import { injectQuery } from '@tanstack/angular-query';
 import { firstValueFrom } from 'rxjs';
 import { roleKeys } from '../../utils/role-util';
+import { Page } from '../../../../shared/types/pagination-types';
+import { Permission } from '../../../permissions/types/permission-types';
+import { stringParam, arrayParam, intParam } from '../../../../shared/utils/query-param-codecs';
+import { ROLE_SORT_VALUES, RoleSortValue } from '../../types/role-types';
 
-const PAGE_SIZES = [10, 20, 50, 100];
+const PAGE_SIZES = [1, 20, 50, 100];
+
+const DEFAULT_PAGE = 1;
 
 @Component({
   imports: [RolesHeader, RolesFilters, RolesTable, Pagination],
@@ -24,15 +25,22 @@ const PAGE_SIZES = [10, 20, 50, 100];
   templateUrl: './roles-page.html',
 })
 export default class RolesPage {
+  public readonly permissions = input.required<Page<Permission>>();
+
   protected readonly pageSizes = PAGE_SIZES;
 
   private readonly roleApiService = inject(RoleApiService);
+
+  private readonly allowedPermissions = computed(() =>
+    this.permissions().content.map((permission) => permission.id),
+  );
+
   private readonly queryParams = injectQueryParams({
     search: stringParam(''),
-    permissions: arrayParam(),
-    sort: arrayParam(),
-    page: intParam(1),
-    size: intParam(this.pageSizes[0], this.pageSizes[0], this.pageSizes.at(-1)),
+    permissions: arrayParam(() => this.allowedPermissions()),
+    sort: arrayParam(ROLE_SORT_VALUES),
+    page: intParam(DEFAULT_PAGE, { min: DEFAULT_PAGE }),
+    size: intParam(this.pageSizes[0], { min: this.pageSizes[0], max: this.pageSizes.at(-1) }),
   });
 
   protected readonly filters = computed(() => this.queryParams.state());
@@ -49,18 +57,18 @@ export default class RolesPage {
   });
 
   protected onSearchTermChange(search: string) {
-    this.queryParams.patch({ search });
+    this.queryParams.patch({ search, page: DEFAULT_PAGE });
   }
 
   protected onSelectedPermissionsChange(permissions: string[]) {
-    this.queryParams.patch({ permissions });
+    this.queryParams.patch({ permissions, page: DEFAULT_PAGE });
   }
 
   protected onCleanFilters() {
-    this.queryParams.patch({ search: '', permissions: [] });
+    this.queryParams.patch({ search: '', permissions: [], page: DEFAULT_PAGE });
   }
 
-  protected onSortValuesChange(sort: string[]) {
+  protected onSortValuesChange(sort: RoleSortValue[]) {
     this.queryParams.patch({ sort });
   }
 

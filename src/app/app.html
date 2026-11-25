@@ -1,4 +1,4 @@
-@if (refreshMutation.isPending() || refreshMutation.isIdle()) {
+@if (isChecking()) {
   <div class="flex min-h-screen">
     <hlm-empty>
       <hlm-empty-header>
@@ -11,8 +11,6 @@
     </hlm-empty>
   </div>
 } @else {
-  <div class="transition-opacity duration-1000 starting:opacity-0">
-    <router-outlet />
-    <hlm-toaster position="bottom-center" />
-  </div>
+  <router-outlet />
+  <hlm-toaster position="bottom-center" />
 }

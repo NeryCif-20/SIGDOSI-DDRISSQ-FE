@@ -142,7 +142,7 @@ export class RoleDialog {
     },
   );
 
-  protected onSelectedChange(permissions: string[]) {
+  protected onSelectedIdsChange(permissions: string[]) {
     this.roleModel.update((value) => ({
       ...value,
       permissions,

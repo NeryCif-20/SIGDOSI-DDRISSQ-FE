@@ -1,0 +1,25 @@
+<button
+  hlmBtn
+  variant="ghost"
+  [hlmDropdownMenuTrigger]="options"
+  align="center"
+  class="rounded-full"
+>
+  <ng-icon name="lucideEllipsis" />
+  <span class="sr-only">Opciones</span>
+</button>
+
+<ng-template #options>
+  <hlm-dropdown-menu>
+    <hlm-dropdown-menu-group>
+      <a hlmDropdownMenuItem [routerLink]="`/users/${id()}`">
+        <ng-icon name="lucideEye" />
+        Ver
+      </a>
+      <button hlmDropdownMenuItem class="group">
+        <ng-icon name="lucidePencil" class="group-hover:fill-current" />
+        Editar
+      </button>
+    </hlm-dropdown-menu-group>
+  </hlm-dropdown-menu>
+</ng-template>

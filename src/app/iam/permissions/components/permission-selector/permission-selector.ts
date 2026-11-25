@@ -3,33 +3,30 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideEye, lucideSearchX } from '@ng-icons/lucide';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmDialogImports } from '@spartan-ng/helm/dialog';
-import { HlmFieldImports } from '@spartan-ng/helm/field';
-import { HlmInputImports } from '@spartan-ng/helm/input';
-import { HlmInputGroupImports } from '@spartan-ng/helm/input-group';
-import { PermissionApiService } from '../../services/permission-api-service';
-import {
-  Permission,
-  PermissionAction,
-  PERMISSION_ACTION_LABELS,
-} from '../../types/permission-types';
 import { HlmCheckboxImports } from '@spartan-ng/helm/checkbox';
 import { SearchInput } from '../../../../shared/components/search-input/search-input';
-import { firstValueFrom } from 'rxjs';
-import { injectQuery } from '@tanstack/angular-query';
-import { groupBy } from '../../../../shared/utils/arrays-util';
-import { permissionKeys } from '../../utils/permission-util';
+import { QueryClient } from '@tanstack/angular-query';
+import { permissionKeys } from '../../queries/permission-keys';
+import {
+  Permission,
+  PERMISSION_ACTION_LABELS,
+  PermissionAction,
+  PermissionGroup,
+} from '../../types/permission-types';
 import { normalize } from '../../../../shared/utils/strings-util';
+import { HlmLabelImports } from '@spartan-ng/helm/label';
+import { TitleCasePipe } from '@angular/common';
+import { Page } from '../../../../shared/types/pagination-types';
 
-type SelectionState = 'all' | 'some' | 'none';
+type CheckState = 'none' | 'all' | 'some';
 
 @Component({
   imports: [
     HlmDialogImports,
     HlmButtonImports,
-    HlmFieldImports,
-    HlmInputGroupImports,
-    HlmInputImports,
     HlmCheckboxImports,
+    HlmLabelImports,
+    TitleCasePipe,
     SearchInput,
     NgIcon,
   ],
@@ -39,71 +36,62 @@ type SelectionState = 'all' | 'some' | 'none';
   providers: [provideIcons({ lucideEye, lucideSearchX })],
 })
 export class PermissionSelector {
-  public readonly readonly = input<string | boolean>(false);
-  public readonly openButtonText = input<string>('Seleccionar');
-  public readonly closeButtonText = input<string>('Listo');
-  public readonly selected = model<string[]>([]);
+  public readonly readonly = input<boolean>(false);
+  public readonly openButtonText = input('Seleccionar...');
+  public readonly closeButtonText = input('Cerrar');
+  public readonly selectedIds = model<string[]>([]);
 
-  private readonly permissionApiService = inject(PermissionApiService);
+  private readonly queryClient = inject(QueryClient);
+  private readonly query = this.queryClient.getQueryData<Page<Permission>>(permissionKeys.lists());
+
+  private readonly groups = computed<PermissionGroup[]>(() => {
+    const permissions = this.query?.content ?? [];
+    const groups = new Map<string, Permission[]>();
+    for (const permission of permissions) {
+      const group = groups.get(permission.module) ?? [];
+      group.push(permission);
+      groups.set(permission.module, group);
+    }
+    return Array.from(groups, ([key, permissions]) => ({
+      module: normalize(key),
+      permissions,
+    }));
+  });
 
   protected readonly searchTerm = signal('');
-
-  private readonly query = injectQuery(() => {
-    return {
-      queryKey: permissionKeys.lists(),
-      queryFn: () => firstValueFrom(this.permissionApiService.getAll()),
-    };
-  });
-
-  private readonly permissions = computed(() => {
-    const search = normalize(this.searchTerm());
-    const content = this.query.data()?.content ?? [];
-    const values = search
-      ? content.filter((permission) => normalize(permission.module).includes(search))
-      : content;
-    return groupBy(values, (permission) => permission.module);
-  });
-
-  protected readonly groups = computed(() =>
-    Object.entries(this.permissions()).map(([module, items]) => ({
-      module,
-      items,
-      state: this.moduleState(items),
-    })),
+  protected readonly description = computed(() =>
+    this.readonly() ? 'Visualiza los seleccionados' : 'Selecciona los que necesites...',
   );
+  protected readonly selectedSet = computed(() => new Set(this.selectedIds()));
+  protected readonly filteredGroups = computed(() => {
+    const term = normalize(this.searchTerm());
+    return term ? this.groups().filter((group) => group.module.includes(term)) : this.groups();
+  });
 
-  protected isSelected(id: string) {
-    return this.selected().includes(id);
-  }
-
-  protected toggle(id: string, checked: boolean) {
-    this.selected.update((current) =>
-      checked
-        ? current.includes(id)
-          ? current
-          : [...current, id]
-        : current.filter((value) => value !== id),
+  protected toggle(id: string) {
+    this.selectedIds.update((values) =>
+      values.includes(id) ? values.filter((value) => value !== id) : [...values, id],
     );
   }
 
-  protected toggleModule(permissions: Permission[], checked: boolean) {
-    this.selected.update((current) => {
-      const ids = permissions.map((permission) => permission.id);
-      return checked
-        ? [...new Set([...current, ...ids])]
-        : current.filter((id) => !ids.includes(id));
-    });
+  protected toggleGroup(group: PermissionGroup) {
+    const groupIds = group.permissions.map((permission) => permission.id);
+    const allSelected = groupIds.every((value) => this.selectedSet().has(value));
+    this.selectedIds.update((values) =>
+      allSelected
+        ? values.filter((id) => !groupIds.includes(id))
+        : [...new Set([...values, ...groupIds])],
+    );
   }
 
-  protected moduleState(permissions: Permission[]): SelectionState {
-    const count = permissions.filter((permission) =>
-      this.selected().includes(permission.id),
-    ).length;
-    if (count === 0) return 'none';
-    return count === permissions.length ? 'all' : 'some';
+  protected deriveState(group: PermissionGroup): CheckState {
+    const selected = this.selectedSet();
+    const permissions = group.permissions;
+    const count = permissions.filter((permission) => selected.has(permission.id)).length;
+    return !count ? 'none' : count === permissions.length ? 'all' : 'some';
   }
 
-  protected getActionLabel(action: PermissionAction) {
+  protected resolveActionLabel(action: PermissionAction) {
     return PERMISSION_ACTION_LABELS[action];
   }
 }

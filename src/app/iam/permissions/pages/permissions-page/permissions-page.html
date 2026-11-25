@@ -2,20 +2,20 @@
 <sigdosi-permissions-filters
   [searchTerm]="filters().search"
   [selectedActions]="filters().actions"
-  (searchTermChange)="onSearchTermChange($event)"
-  (selectedActionsChange)="onSelectedActionsChange($event)"
+  (searchTermChange)="setSearch($event)"
+  (selectedActionsChange)="setActions($event)"
   (cleanFilters)="onCleanFilters()"
 />
 <sigdosi-permissions-table
   [data]="query.data()!.content"
   [sortValues]="filters().sort"
-  (sortValuesChange)="onSortValuesChange($event)"
+  (sortValuesChange)="setSort($event)"
 />
 <sigdosi-pagination
   [currentPage]="filters().page"
   [elementsPerPage]="filters().size"
   [totalElements]="query.data()!.totalElements"
   [pageSizes]="pageSizes"
-  (currentPageChange)="onCurrentPageChange($event)"
-  (elementsPerPageChange)="onElementsPerPageChange($event)"
+  (currentPageChange)="setPage($event)"
+  (elementsPerPageChange)="setSize($event)"
 />

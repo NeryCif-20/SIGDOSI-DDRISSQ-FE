@@ -137,7 +137,9 @@ export class RoleDialog {
     },
     {
       submission: {
-        action: async (form) => this.saveMutation.mutate(form().value()),
+        action: async (form) => {
+          await this.saveMutation.mutateAsync(form().value());
+        },
       },
     },
   );

@@ -44,7 +44,9 @@ export class IdentifyStep {
     },
     {
       submission: {
-        action: async (form) => this.identifyMutation.mutate(form().value()),
+        action: async (form) => {
+          await this.identifyMutation.mutateAsync(form().value());
+        },
       },
     },
   );

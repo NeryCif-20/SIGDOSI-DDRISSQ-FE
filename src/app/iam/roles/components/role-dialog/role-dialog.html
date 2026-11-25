@@ -34,9 +34,21 @@
   </form>
 }
 <hlm-dialog-footer>
-  <button hlmBtn variant="outline" [disabled]="isBusy()" hlmDialogClose>Cancelar</button>
+  <button
+    hlmBtn
+    variant="outline"
+    [disabled]="deleteMutation.isPending() || deleteMutation.isSuccess() || roleForm().submitting()"
+    hlmDialogClose
+  >
+    Cancelar
+  </button>
   @if (action() === 'delete') {
-    <button hlmBtn variant="destructive" [disabled]="isBusy()" (click)="deleteMutation.mutate()">
+    <button
+      hlmBtn
+      variant="destructive"
+      [disabled]="deleteMutation.isPending() || deleteMutation.isSuccess()"
+      (click)="deleteMutation.mutate()"
+    >
       @if (isBusy()) {
         <hlm-spinner />
       } @else {
@@ -44,8 +56,8 @@
       }
     </button>
   } @else {
-    <button hlmBtn form="roleForm" [disabled]="isBusy()">
-      @if (isBusy()) {
+    <button hlmBtn form="roleForm" [disabled]="roleForm().submitting()">
+      @if (roleForm().submitting()) {
         <hlm-spinner />
       } @else {
         Guardar

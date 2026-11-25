@@ -64,7 +64,9 @@ export class PasswordForm {
     },
     {
       submission: {
-        action: async (form) => this.setupPasswordMutation.mutate(form().value()),
+        action: async (form) => {
+          await this.setupPasswordMutation.mutateAsync(form().value());
+        },
       },
     },
   );

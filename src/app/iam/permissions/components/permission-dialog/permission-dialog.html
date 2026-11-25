@@ -65,12 +65,8 @@
       }
     </button>
   } @else {
-    <button
-      hlmBtn
-      form="permissionForm"
-      [disabled]="saveMutation.isPending() || saveMutation.isSuccess()"
-    >
-      @if (saveMutation.isPending() || saveMutation.isSuccess()) {
+    <button hlmBtn form="permissionForm" [disabled]="permissionForm().submitting()">
+      @if (permissionForm().submitting()) {
         <hlm-spinner />
       } @else {
         Guardar

@@ -60,7 +60,9 @@ export class PasswordStep {
     },
     {
       submission: {
-        action: async (form) => this.loginMutation.mutate(form().value()),
+        action: async (form) => {
+          await this.loginMutation.mutateAsync(form().value());
+        },
       },
     },
   );

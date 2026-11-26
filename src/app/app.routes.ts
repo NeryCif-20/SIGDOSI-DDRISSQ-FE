@@ -14,19 +14,7 @@ export const routes: Routes = [
   {
     path: 'error',
     title: 'Error',
-    loadComponent: () => import('./shared/layouts/error-layout/error-layout'),
-    children: [
-      {
-        path: '404',
-        title: 'No encontrado',
-        loadComponent: () => import('./shared/pages/error404-page/error404-page'),
-      },
-      {
-        path: '',
-        pathMatch: 'full',
-        loadComponent: () => import('./shared/pages/error-page/error-page'),
-      },
-    ],
+    loadChildren: () => import('./error/error.routes'),
   },
   {
     path: '',
@@ -52,5 +40,9 @@ export const routes: Routes = [
         loadChildren: () => import('./iam/users/users.routes'),
       },
     ],
+  },
+  {
+    path: '**',
+    redirectTo: '/error/404',
   },
 ];

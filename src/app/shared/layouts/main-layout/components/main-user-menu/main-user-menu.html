@@ -5,10 +5,7 @@
   align="end"
   class="group rounded-full"
 >
-  <sigdosi-user-avatar
-    [avatar]="user()!.avatar"
-    [fallback]="`${user()!.firstName} ${user()!.lastName}`"
-  />
+  <sigdosi-user-avatar [avatar]="user()!.avatar" [fallback]="user()! | fullName" />
   <ng-icon
     name="lucideChevronDown"
     class="transition-transform duration-150 group-aria-expanded:rotate-180"
@@ -22,14 +19,16 @@
         <div class="flex flex-col items-center gap-1">
           <sigdosi-user-avatar
             [avatar]="user()!.avatar"
-            [fallback]="`${user()!.firstName} ${user()!.lastName}`"
-            classes="my-2 size-16"
+            [fallback]="user()! | fullName"
+            classes="my-2 size-16 [&_[hlmAvatarFallback]]:text-3xl"
           />
-          <div class="flex flex-1 flex-col items-center gap-1">
-            <span>Nickname</span>
-            <span class="shimmer">{{ 'nickname@example.com' }}</span>
-            <span hlmBadge class="bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"
-              >Role</span
+          <div class="flex flex-1 flex-col items-center gap-2">
+            <span>{{ user()! | fullName }}</span>
+            <span class="shimmer">{{ user()!.email }}</span>
+            <span
+              hlmBadge
+              class="bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"
+              >{{ user()!.role.name }}</span
             >
           </div>
         </div>

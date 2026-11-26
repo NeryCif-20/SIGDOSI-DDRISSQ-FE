@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { ThemeSelector } from '../../components/theme-selector/theme-selector';
+import { ThemeSelector } from '../../../shared/components/theme-selector/theme-selector';
 
 @Component({
   imports: [RouterOutlet, ThemeSelector],
@@ -8,4 +8,4 @@ import { ThemeSelector } from '../../components/theme-selector/theme-selector';
   styleUrl: './error-layout.css',
   templateUrl: './error-layout.html',
 })
-export default class ErrorLayout {}
+export class ErrorLayout {}

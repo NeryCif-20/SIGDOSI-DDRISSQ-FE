@@ -4,16 +4,20 @@
     [variant]="readonly() ? 'ghost' : 'default'"
     hlmBtn
     [class]="readonly() ? 'rounded-full' : 'w-full'"
+    hlmTooltip="Ver permisos"
+    [tooltipDisabled]="tooltipDisabled()"
+    position="left"
   >
     @if (readonly()) {
       <ng-icon name="lucideEye" />
+      <span class="sr-only">Ver permisos</span>
     } @else {
       {{ openButtonText() }}
     }
   </button>
   <hlm-dialog-content
     *hlmDialogPortal="let context"
-    class="w-full sm:min-w-lg"
+    class="min-w-3xs sm:min-w-lg"
     [showCloseButton]="false"
   >
     <hlm-dialog-header>

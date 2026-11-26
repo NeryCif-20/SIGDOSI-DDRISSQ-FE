@@ -17,6 +17,7 @@ import { normalize } from '../../../../shared/utils/strings-util';
 import { HlmLabelImports } from '@spartan-ng/helm/label';
 import { TitleCasePipe } from '@angular/common';
 import { Page } from '../../../../shared/types/pagination-types';
+import { HlmTooltipImports } from '@spartan-ng/helm/tooltip';
 
 type CheckState = 'none' | 'all' | 'some';
 
@@ -26,6 +27,7 @@ type CheckState = 'none' | 'all' | 'some';
     HlmButtonImports,
     HlmCheckboxImports,
     HlmLabelImports,
+    HlmTooltipImports,
     TitleCasePipe,
     SearchInput,
     NgIcon,
@@ -37,6 +39,7 @@ type CheckState = 'none' | 'all' | 'some';
 })
 export class PermissionSelector {
   public readonly readonly = input<boolean>(false);
+  public readonly tooltip = input<boolean>(false);
   public readonly openButtonText = input('Seleccionar...');
   public readonly closeButtonText = input('Cerrar');
   public readonly selectedIds = model<string[]>([]);
@@ -67,6 +70,7 @@ export class PermissionSelector {
     const term = normalize(this.searchTerm());
     return term ? this.groups().filter((group) => group.module.includes(term)) : this.groups();
   });
+  protected readonly tooltipDisabled = computed(() => !(this.tooltip() && this.readonly()));
 
   protected toggle(id: string) {
     this.selectedIds.update((values) =>

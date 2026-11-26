@@ -1,6 +1,4 @@
-<div class="flex items-center justify-center">
-  <hlm-avatar [class]="classes()">
-    <img hlmAvatarImage src="" alt="Avatar" />
-    <span hlmAvatarFallback>{{ 'Nickname' | initials }}</span>
-  </hlm-avatar>
-</div>
+<hlm-avatar [class]="finalClasses()">
+  <img hlmAvatarImage [src]="avatar()" alt="Avatar" />
+  <span hlmAvatarFallback>{{ fallback() | initials }}</span>
+</hlm-avatar>

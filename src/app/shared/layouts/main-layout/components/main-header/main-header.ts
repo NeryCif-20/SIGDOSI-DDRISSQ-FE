@@ -25,6 +25,9 @@ import { MainUserMenu } from '../main-user-menu/main-user-menu';
   styles: ``,
   templateUrl: './main-header.html',
   providers: [provideIcons({ lucideLogIn })],
+  host: {
+    class: 'sticky top-0 z-50 block w-full',
+  },
 })
 export class MainHeader {
   private readonly authService = inject(AuthService);

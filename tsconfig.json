@@ -41,7 +41,8 @@
       "@spartan-ng/helm/checkbox": ["./src/app/shared/ui/components/checkbox/src/index.ts"],
       "@spartan-ng/helm/select": ["./src/app/shared/ui/components/select/src/index.ts"],
       "@spartan-ng/helm/table": ["./src/app/shared/ui/components/table/src/index.ts"],
-      "@spartan-ng/helm/pagination": ["./src/app/shared/ui/components/pagination/src/index.ts"]
+      "@spartan-ng/helm/pagination": ["./src/app/shared/ui/components/pagination/src/index.ts"],
+      "@spartan-ng/helm/item": ["./src/app/shared/ui/components/item/src/index.ts"]
     }
   },
   "angularCompilerOptions": {

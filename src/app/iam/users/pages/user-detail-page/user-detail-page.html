@@ -1,6 +1,114 @@
 <sigdosi-page-header badge="SEGURIDAD Y ACCESO" title="Detalle de usuario">
   <button hlmBtn class="group">
     <ng-icon name="lucidePencil" class="group-hover:fill-current" />
-    Editar usuario
+    Editar
   </button>
 </sigdosi-page-header>
+<hlm-card class="mb-8">
+  <div hlmCardContent class="flex flex-col-reverse gap-8 sm:flex-row sm:justify-between">
+    <div class="flex flex-col items-center gap-8 sm:flex-row">
+      <sigdosi-user-avatar
+        [avatar]="user().avatar"
+        [fallback]="user() | fullName"
+        classes="size-48 [&_[hlmAvatarFallback]]:text-8xl"
+      />
+      <span class="text-4xl font-bold">{{ user() | fullName }}</span>
+    </div>
+    <div class="flex flex-col items-center justify-center gap-4">
+      <span hlmCode class="text-2xl">ID</span>
+      <sigdosi-id-badge [id]="user().id" />
+    </div>
+  </div>
+</hlm-card>
+<div class="grid grid-cols-1 items-start gap-8 sm:grid-cols-2">
+  <hlm-card>
+    <hlm-card-header>
+      <h3 hlmCardTitle>Información personal</h3>
+      <p hlmCardDescription>Datos de contacto e identidad.</p>
+    </hlm-card-header>
+    <div hlmCardContent class="flex flex-col gap-0">
+      <hlm-item class="px-0">
+        <div class="bg-muted/50 flex size-12 items-center justify-center rounded-lg">
+          <ng-icon name="lucideMail" size="20" />
+        </div>
+        <hlm-item-content class="min-w-0">
+          <hlm-item-title>Correo electrónico</hlm-item-title>
+          <hlm-item-description class="overflow-x-auto whitespace-nowrap">
+            {{ user().email }}
+          </hlm-item-description>
+        </hlm-item-content>
+        <hlm-item-actions>
+          <button hlmBtn variant="ghost" (click)="copyToClipboard(user().email)">
+            <ng-icon name="lucideCopy" />
+          </button>
+        </hlm-item-actions>
+      </hlm-item>
+      <hlm-separator />
+      <hlm-item class="px-0">
+        <div class="bg-muted/50 flex size-12 items-center justify-center rounded-lg">
+          <ng-icon name="lucidePhone" size="20" />
+        </div>
+        <hlm-item-content>
+          <hlm-item-title>Número de Teléfono</hlm-item-title>
+          <hlm-item-description>{{ user().phoneNumber | phoneNumber }}</hlm-item-description>
+        </hlm-item-content>
+        @if (user().phoneNumber) {
+          <hlm-item-actions>
+            <button hlmBtn variant="ghost" (click)="copyToClipboard(user().phoneNumber!)">
+              <ng-icon name="lucideCopy" />
+            </button>
+          </hlm-item-actions>
+        }
+      </hlm-item>
+      <hlm-separator />
+      <hlm-item class="px-0 pb-0">
+        <div class="bg-muted/50 flex size-12 items-center justify-center rounded-lg">
+          <ng-icon name="lucideIdCard" size="20" />
+        </div>
+        <hlm-item-content>
+          <hlm-item-title>CUI</hlm-item-title>
+          <hlm-item-description>{{ user().cui | cui }}</hlm-item-description>
+        </hlm-item-content>
+        <hlm-item-actions>
+          <button hlmBtn variant="ghost" (click)="copyToClipboard(user().cui)">
+            <ng-icon name="lucideCopy" />
+          </button>
+        </hlm-item-actions>
+      </hlm-item>
+    </div>
+  </hlm-card>
+  <hlm-card>
+    <hlm-card-header>
+      <h3 hlmCardTitle>Cuenta y acceso</h3>
+      <p hlmCardDescription>Configuración actual del usuario.</p>
+    </hlm-card-header>
+    <div hlmCardContent class="flex flex-col gap-0">
+      <hlm-item class="px-0">
+        <div class="bg-muted/50 flex size-12 items-center justify-center rounded-lg">
+          <ng-icon name="lucideCircleUser" size="20" />
+        </div>
+        <hlm-item-content>
+          <hlm-item-title>Estado</hlm-item-title>
+        </hlm-item-content>
+        <hlm-item-actions>
+          <sigdosi-user-status-badge [status]="user().status" />
+        </hlm-item-actions>
+      </hlm-item>
+      <hlm-separator />
+      <hlm-item class="px-0 pb-0">
+        <div class="bg-muted/50 flex size-12 items-center justify-center rounded-lg">
+          <ng-icon name="lucideShieldUser" size="20" />
+        </div>
+        <hlm-item-content>
+          <hlm-item-title>Rol</hlm-item-title>
+          <hlm-item-description class="overflow-x-auto whitespace-nowrap">{{
+            user().role.name
+          }}</hlm-item-description>
+        </hlm-item-content>
+        <hlm-item-actions>
+          <sigdosi-permission-selector [readonly]="true" [tooltip]="true" />
+        </hlm-item-actions>
+      </hlm-item>
+    </div>
+  </hlm-card>
+</div>

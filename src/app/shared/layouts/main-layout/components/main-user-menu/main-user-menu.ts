@@ -10,6 +10,7 @@ import { AuthService } from '../../../../../iam/auth/services/auth-service';
 import { UserAvatar } from '../../../../../iam/users/components/user-avatar/user-avatar';
 import { injectMutation } from '@tanstack/angular-query';
 import { firstValueFrom } from 'rxjs';
+import { FullNamePipe } from '../../../../../iam/users/pipes/full-name-pipe';
 
 @Component({
   imports: [
@@ -19,6 +20,7 @@ import { firstValueFrom } from 'rxjs';
     HlmBadgeImports,
     NgIcon,
     UserAvatar,
+    FullNamePipe,
   ],
   selector: 'sigdosi-main-user-menu',
   styles: ``,
